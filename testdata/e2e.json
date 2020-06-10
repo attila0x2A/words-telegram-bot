@@ -1,0 +1,193 @@
+[
+  {
+    "Send": "/start",
+    "Want": "Welcome to the language bot. Still in development. No instructions so far. All sentences and translations are from Tatoeba's (https://tatoeba.org) dataset, released under a CC-BY 2.0 FR.",
+    "WantButtons": null
+  },
+  {
+    "Send": "many words",
+    "Want": "Couldn't process your message \"many words\"",
+    "WantButtons": null
+  },
+  {
+    "Send": "oijasdki#noresults#",
+    "Want": "Couldn't find definitions",
+    "WantButtons": null
+  },
+  {
+    "Send": "/practice",
+    "Want": "No more rows to practice; exiting practice mode.",
+    "WantButtons": null
+  },
+  {
+    "Send": "fekete",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "WantButtons": [
+      "Learn"
+    ]
+  },
+  {
+    "Send": "fekete",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "WantButtons": [
+      "Learn"
+    ]
+  },
+  {
+    "Send": "b:Learn",
+    "Want": "",
+    "WantButtons": null
+  },
+  {
+    "Send": "fekete",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "WantButtons": [
+      "Reset progress"
+    ]
+  },
+  {
+    "Send": "/practice",
+    "Want": "fekete",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "b:Don't know",
+    "Want": "fekete",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "/settings",
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
+    "WantButtons": [
+      "Input Language"
+    ]
+  },
+  {
+    "Send": "/practice",
+    "Want": "fekete",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "b:Don't know",
+    "Want": "fekete",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "b:Know",
+    "Want": "No more rows to practice; exiting practice mode.",
+    "WantButtons": null
+  },
+  {
+    "Send": "falu",
+    "Want": "*falu*\n\n1\\. \\[*noun*\\] village\n\nUsage examples:\n\n1\\. Minden falu egy személyt delegálhatott\\.\n\n2\\. Mindegyik falu szép volt\\.\n\n3\\. A gátépítés előtt egy falu volt itt\\.",
+    "WantButtons": [
+      "Learn"
+    ]
+  },
+  {
+    "Send": "b:Learn",
+    "Want": "",
+    "WantButtons": null
+  },
+  {
+    "Send": "/practice",
+    "Want": "falu",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "b:Don't know",
+    "Want": "falu",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
+  },
+  {
+    "Send": "/stop",
+    "Want": "Stopped practice",
+    "WantButtons": null
+  },
+  {
+    "Send": "/settings",
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
+    "WantButtons": [
+      "Input Language"
+    ]
+  },
+  {
+    "Send": "b:Input Language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "WantButtons": null
+  },
+  {
+    "Send": "NotARealLanguage",
+    "Want": "Unsupported language. Try again.",
+    "WantButtons": null
+  },
+  {
+    "Send": "English",
+    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
+    "WantButtons": [
+      "Input Language"
+    ]
+  },
+  {
+    "Send": "/stop",
+    "Want": "Exited settings",
+    "WantButtons": null
+  },
+  {
+    "Send": "/settings",
+    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
+    "WantButtons": [
+      "Input Language"
+    ]
+  },
+  {
+    "Send": "b:Input Language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "WantButtons": null
+  },
+  {
+    "Send": "Hungarian",
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
+    "WantButtons": [
+      "Input Language"
+    ]
+  },
+  {
+    "Send": "b:Input Language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "WantButtons": null
+  },
+  {
+    "Send": "/stop",
+    "Want": "Exited settings",
+    "WantButtons": null
+  },
+  {
+    "Send": "/delete falu",
+    "Want": "Deleted \"falu\"!",
+    "WantButtons": null
+  },
+  {
+    "Send": "/practice",
+    "Want": "No more rows to practice; exiting practice mode.",
+    "WantButtons": null
+  }
+]

@@ -1,0 +1,12 @@
+secret.go
+*.swp
+*.swo
+db.sql
+words
+words_image.tar
+data/*.csv
+data/*.bz2
+commands.md
+cover.out
+testdata/e2e_corrected.json
+backups/*
