@@ -1,3 +1,5 @@
+This is not an officially supported Google product!
+
 This is a telegram bot to help learn words through spaced repetitions.
 
 It dynamically fetches definitions from wiktionary, and uses tatoeba database
