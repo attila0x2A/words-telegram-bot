@@ -48,37 +48,80 @@ func TestTelegramBotE2E(t *testing.T) {
 	// Order is important!
 	send := strings.Split(strings.Trim(`
 /start
+
 many words
+
 oijasdki#noresults#
+
 /practice
+
 fekete
+
 fekete
+
 b:Learn
+
 fekete
+
 /practice
+
 b:Don't know
+
 /settings
+
 /practice
+
 b:Don't know
+
 b:Know
+
 falu
+
 b:Learn
+
 /practice
+
 b:Don't know
+
 /stop
+
 /settings
+
 b:Input Language
+
 NotARealLanguage
+
 English
+
 /stop
+
 /settings
+
 b:Input Language
+
 Hungarian
+
 b:Input Language
+
 /stop
+
 /delete falu
+
 /practice
-`, "\n"), "\n")
+
+/add
+
+/stop
+
+/add
+
+cardfront
+cardback (definitions or what not)
+
+cardfront
+
+/practice
+`, "\n"), "\n\n")
 
 	dir, err := ioutil.TempDir("", "e2e")
 	if err != nil {

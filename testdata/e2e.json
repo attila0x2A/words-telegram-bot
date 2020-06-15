@@ -189,5 +189,40 @@
     "Send": "/practice",
     "Want": "No more rows to practice; exiting practice mode.",
     "WantButtons": null
+  },
+  {
+    "Send": "/add",
+    "Want": "\nEnter the card you want to add in the format:\n\u003cfront of the card (word, expression, question)\u003e\n\u003cback of the card (can be multiline)\u003e\n",
+    "WantButtons": null
+  },
+  {
+    "Send": "/stop",
+    "Want": "Cancelled addition",
+    "WantButtons": null
+  },
+  {
+    "Send": "/add",
+    "Want": "\nEnter the card you want to add in the format:\n\u003cfront of the card (word, expression, question)\u003e\n\u003cback of the card (can be multiline)\u003e\n",
+    "WantButtons": null
+  },
+  {
+    "Send": "cardfront\ncardback (definitions or what not)",
+    "Want": "Added \"cardfront\" for learning!",
+    "WantButtons": null
+  },
+  {
+    "Send": "cardfront",
+    "Want": "cardback (definitions or what not)",
+    "WantButtons": [
+      "Reset progress"
+    ]
+  },
+  {
+    "Send": "/practice",
+    "Want": "cardfront",
+    "WantButtons": [
+      "Know",
+      "Don't know"
+    ]
   }
 ]

@@ -66,6 +66,7 @@ func DefaultActions(c *Clients) []Action {
 		&StartAction{c},
 		&SettingsAction{c},
 		&PracticeAction{c},
+		&AddCommandAction{c},
 		&DefineWordAction{c},
 		// /start
 		// /settings
@@ -498,6 +499,55 @@ func (a *AnswerAction) Perform(u *Update) ([]Action, error) {
 }
 
 func (a *AnswerAction) Match(u *Update) bool {
+	return u.Message != nil
+}
+
+type AddCommandAction struct {
+	*Clients
+}
+
+func (a *AddCommandAction) Perform(u *Update) ([]Action, error) {
+	chatId, err := u.ChatId()
+	if err != nil {
+		return nil, err
+	}
+	return []Action{
+			&StopAction{a.Clients, "Cancelled addition"},
+			&SettingsAction{a.Clients},
+			&AddWordAction{a.Clients},
+		}, a.Telegram.SendTextMessage(chatId, `
+Enter the card you want to add in the format:
+<front of the card (word, expression, question)>
+<back of the card (can be multiline)>
+`)
+}
+
+func (a *AddCommandAction) Match(u *Update) bool {
+	return u.Message != nil && u.Message.Text == "/add"
+}
+
+type AddWordAction struct {
+	*Clients
+}
+
+func (a *AddWordAction) Perform(u *Update) ([]Action, error) {
+	chatId, err := u.ChatId()
+	if err != nil {
+		return nil, err
+	}
+	parts := strings.Split(u.Message.Text, "\n")
+	if len(parts) < 2 {
+		return nil, a.Telegram.SendTextMessage(chatId, "Wrong format")
+	}
+	front := parts[0]
+	back := strings.Join(parts[1:], "\n")
+	if err := a.Repetitions.Save(chatId, front, back); err != nil {
+		return nil, err
+	}
+	return DefaultActions(a.Clients), a.Telegram.SendTextMessage(chatId, fmt.Sprintf("Added %q for learning!", front))
+}
+
+func (a *AddWordAction) Match(u *Update) bool {
 	return u.Message != nil
 }
 
