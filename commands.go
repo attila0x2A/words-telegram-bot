@@ -64,6 +64,15 @@ func init() {
 				"ukr": true,
 			},
 		},
+		"German": Settings{
+			InputLanguage:         "German",
+			InputLanguageISO639_3: "deu",
+			TranslationLanguages: map[string]bool{
+				"eng": true,
+				"rus": true,
+				"ukr": true,
+			},
+		},
 	}
 }
 
