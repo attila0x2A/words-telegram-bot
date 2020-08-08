@@ -10,3 +10,5 @@ commands.md
 cover.out
 testdata/e2e_corrected.json
 backups/*
+
+.vscode/
