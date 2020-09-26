@@ -207,14 +207,16 @@ Current settings:
 Input language: %q
 Input language in ISO 639-3: %q
 Translation languages in ISO 639-3: %s
+Time Zone: %s
 
 Choose setting which you want to modify.
 (The choice might improve in the future.)
-`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","))
+`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone)
 	return []Action{
 			// Note that stop should be handled before input language is!
 			&StopAction{a.Clients, "Exited settings"},
 			&InputLanguageButton{a.Clients},
+			&TimeZoneButton{a.Clients},
 			&PracticeAction{a.Clients},
 			&CatchAllMessagesAction{CatchAllAction{
 				a.Clients, "type /stop to exit settings"}},
@@ -222,12 +224,19 @@ Choose setting which you want to modify.
 			ChatId: chatId,
 			Text:   msg,
 			ReplyMarkup: &ReplyMarkup{
-				InlineKeyboard: [][]*InlineKeyboard{[]*InlineKeyboard{
-					&InlineKeyboard{
+				InlineKeyboard: [][]*InlineKeyboard{{
+					{
 						Text: "Input Language",
 						CallbackData: CallbackInfo{
 							Action:  ChangeSettingAction,
 							Setting: "InputLanguage",
+						}.String(),
+					},
+					{
+						Text: "Time Zone",
+						CallbackData: CallbackInfo{
+							Action:  ChangeSettingAction,
+							Setting: "TimeZone",
 						}.String(),
 					},
 				}},
@@ -266,6 +275,32 @@ func (b *InputLanguageButton) Match(u *Update) bool {
 	return info.Setting == "InputLanguage"
 }
 
+type TimeZoneButton struct {
+	*Clients
+}
+
+func (b *TimeZoneButton) Perform(u *Update) ([]Action, error) {
+	chatId, err := u.ChatId()
+	if err != nil {
+		return nil, err
+	}
+	return []Action{
+			&StopAction{b.Clients, "Exited settings"},
+			&PickTimeZoneAction{b.Clients},
+		}, b.Telegram.SendMessage(&MessageReply{
+			ChatId: chatId,
+			Text:   "Input your timezone in format (UTC, UTC+X or UTC-X)",
+		})
+}
+
+func (b *TimeZoneButton) Match(u *Update) bool {
+	if u.CallbackQuery == nil {
+		return false
+	}
+	info := CallbackInfoFromString(u.CallbackQuery.Data)
+	return info.Setting == "TimeZone"
+}
+
 type PickLanguageAction struct {
 	*Clients
 }
@@ -273,16 +308,35 @@ type PickLanguageAction struct {
 func (a *PickLanguageAction) Perform(u *Update) ([]Action, error) {
 	m := u.Message
 	chatId := m.Chat.Id
-	set, ok := SupportedInputLanguages[m.Text]
-	if !ok {
+	err := a.Settings.SetLanguage(chatId, m.Text)
+	if err != nil {
 		return nil, a.Telegram.SendTextMessage(chatId, "Unsupported language. Try again.")
 	}
-	a.Settings.Set(chatId, &set)
 	sa := SettingsAction{a.Clients}
 	return sa.Perform(u)
 }
 
 func (a *PickLanguageAction) Match(u *Update) bool {
+	return u.Message != nil
+}
+
+type PickTimeZoneAction struct {
+	*Clients
+}
+
+func (a *PickTimeZoneAction) Perform(u *Update) ([]Action, error) {
+	m := u.Message
+	chatId := m.Chat.Id
+	set := TimeZones[m.Text]
+	if !set {
+		return nil, a.Telegram.SendTextMessage(chatId, "Unsupported time zone. Try again (format should be UTC, UTC+X or UTC-X).")
+	}
+	a.Settings.SetTimeZone(chatId, m.Text)
+	sa := SettingsAction{a.Clients}
+	return sa.Perform(u)
+}
+
+func (a *PickTimeZoneAction) Match(u *Update) bool {
 	return u.Message != nil
 }
 

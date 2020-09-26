@@ -43,6 +43,7 @@ const UsePractice = PracticeKnowledge
 
 var (
 	SupportedInputLanguages map[string]Settings
+	TimeZones               map[string]bool
 )
 
 func init() {
@@ -74,6 +75,14 @@ func init() {
 			},
 		},
 	}
+	TimeZones = func() map[string]bool {
+		timeZones := make(map[string]bool)
+		for i := -12; i < 12; i++ {
+			timeZones[fmt.Sprintf("UTC%+d", i)] = true
+		}
+		timeZones["UTC"] = true
+		return timeZones
+	}()
 }
 
 type CallbackAction int

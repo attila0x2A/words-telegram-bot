@@ -18,7 +18,7 @@ FROM golang:alpine AS builder
 RUN apk update && apk add --no-cache git gcc g++ ca-certificates apache2-utils
 WORKDIR /go/src/words
 COPY *.go ./
-Run go get -d -v -tags netgo -installsuffix netgo
+RUN go get -d -v -tags netgo -installsuffix netgo
 # netgo and ldflags makes sure that dns resolver and binary are statically
 # linked giving the ability for smaller images.
 RUN go build -tags netgo -installsuffix netgo -ldflags '-extldflags "-static"' -o /go/bin/words
