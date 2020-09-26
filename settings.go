@@ -30,6 +30,7 @@ type Settings struct {
 	// which to accept the translations.
 	// true if translation is accepted
 	TranslationLanguages map[string]bool
+	TimeZone             string
 }
 
 func SettingsFromString(s string) *Settings {
@@ -49,6 +50,7 @@ func DefaultSettings() *Settings {
 			"rus": true,
 			"ukr": true,
 		},
+		TimeZone: "UTC",
 	}
 }
 
@@ -102,6 +104,30 @@ func (c *SettingsConfig) Set(chatID int64, s *Settings) error {
 		chatID, s.String())
 	if err != nil {
 		return fmt.Errorf("INTERNAL: Failed updating settings: %w", err)
+	}
+	return nil
+}
+
+func (c *SettingsConfig) SetLanguage(chatid int64, language string) error {
+	currentSettings, err := c.Get(chatid)
+	if err == nil {
+		languageSettings, ok := SupportedInputLanguages[language]
+		if !ok {
+			return fmt.Errorf("unsupported language %q", language)
+		}
+		currentSettings.InputLanguage = languageSettings.InputLanguage
+		currentSettings.InputLanguageISO639_3 = languageSettings.InputLanguageISO639_3
+		currentSettings.TranslationLanguages = languageSettings.TranslationLanguages
+		return c.Set(chatid, currentSettings)
+	}
+	return nil
+}
+
+func (c *SettingsConfig) SetTimeZone(chatid int64, tz string) error {
+	currentSettings, err := c.Get(chatid)
+	if err == nil {
+		currentSettings.TimeZone = tz
+		return c.Set(chatid, currentSettings)
 	}
 	return nil
 }
