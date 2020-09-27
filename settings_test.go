@@ -55,4 +55,15 @@ func TestSettings(t *testing.T) {
 	if !reflect.DeepEqual(s, ns) {
 		t.Errorf("new settings were not set! old: %v\n new: %v", s, ns)
 	}
+
+	gotAll, err := settings.GetAll()
+	if err != nil {
+		t.Error(err)
+	}
+	wantAll := map[int64]*Settings{
+		chatID: ns,
+	}
+	if !reflect.DeepEqual(gotAll, wantAll) {
+		t.Errorf("settings.GetAll() got: %v want: %v", gotAll, wantAll)
+	}
 }
