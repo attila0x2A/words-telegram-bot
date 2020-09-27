@@ -81,6 +81,33 @@ func NewSettingsConfig(dbPath string) (*SettingsConfig, error) {
 	return &SettingsConfig{db}, nil
 }
 
+func (c *SettingsConfig) GetAll() (map[int64]*Settings, error) {
+	rows, err := c.db.Query(`
+		SELECT chat_id, settings
+		FROM Settings`)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := make(map[int64]*Settings)
+
+	for rows.Next() {
+		var (
+			chatID int64
+			s      string
+		)
+		if err := rows.Scan(&chatID, &s); err != nil {
+			return nil, err
+		}
+		r[chatID] = SettingsFromString(s)
+	}
+	return r, nil
+}
+
 func (c *SettingsConfig) Get(chatID int64) (*Settings, error) {
 	row := c.db.QueryRow(`
 		SELECT settings
