@@ -83,6 +83,33 @@ func NewSettingsConfig(dbPath string) (*SettingsConfig, error) {
 	return &SettingsConfig{db}, nil
 }
 
+func (c *SettingsConfig) GetAll() (map[int64]*Settings, error) {
+	rows, err := c.db.Query(`
+		SELECT chat_id, settings
+		FROM Settings`)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := make(map[int64]*Settings)
+
+	for rows.Next() {
+		var (
+			chatID int64
+			s      string
+		)
+		if err := rows.Scan(&chatID, &s); err != nil {
+			return nil, err
+		}
+		r[chatID] = SettingsFromString(s)
+	}
+	return r, nil
+}
+
 func (c *SettingsConfig) Get(chatID int64) (*Settings, error) {
 	row := c.db.QueryRow(`
 		SELECT settings
@@ -113,13 +140,13 @@ func (c *SettingsConfig) Set(chatID int64, s *Settings) error {
 func (c *SettingsConfig) SetLanguage(chatid int64, language string) error {
 	currentSettings, err := c.Get(chatid)
 	if err == nil {
-		languageSettings, ok := SupportedInputLanguages[language];
-		if (!ok) {
+		languageSettings, ok := SupportedInputLanguages[language]
+		if !ok {
 			return fmt.Errorf("unsupported language %q", language)
 		}
-		currentSettings.InputLanguage = languageSettings.InputLanguage;
-		currentSettings.InputLanguageISO639_3 = languageSettings.InputLanguageISO639_3;
-		currentSettings.TranslationLanguages = languageSettings.TranslationLanguages;
+		currentSettings.InputLanguage = languageSettings.InputLanguage
+		currentSettings.InputLanguageISO639_3 = languageSettings.InputLanguageISO639_3
+		currentSettings.TranslationLanguages = languageSettings.TranslationLanguages
 		return c.Set(chatid, currentSettings)
 	}
 	return nil

@@ -14,14 +14,17 @@
 package main
 
 import (
+	"database/sql"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
+	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestSettings(t *testing.T) {
+func TestReminders(t *testing.T) {
 	dir, err := ioutil.TempDir("", "repetition")
 	if err != nil {
 		t.Fatal(err)
@@ -29,41 +32,47 @@ func TestSettings(t *testing.T) {
 	t.Logf("Temp dir: %q", dir)
 	defer os.RemoveAll(dir)
 
-	db := filepath.Join(dir, "tmpdb")
-	settings, err := NewSettingsConfig(db)
+	dbPath := filepath.Join(dir, "tmpdb")
+
+	settings, err := NewSettingsConfig(dbPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var chatID int64 = 0
-	s, err := settings.Get(chatID)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		t.Error(err)
-	}
-	if err := settings.Set(chatID, s); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	s.InputLanguage = "foo_bar"
-	if err := settings.Set(chatID, s); err != nil {
-		t.Error(err)
-	}
-	ns, err := settings.Get(chatID)
+	r, err := NewReminder(&Clients{
+		Settings: settings,
+	}, db)
 	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(s, ns) {
-		t.Errorf("new settings were not set! old: %v\n new: %v", s, ns)
+		t.Fatal(err)
 	}
 
-	gotAll, err := settings.GetAll()
-	if err != nil {
-		t.Error(err)
+	const chatID int64 = 0
+	if err := settings.Set(chatID, DefaultSettings()); err != nil {
+		t.Fatal(err)
 	}
-	wantAll := map[int64]*Settings{
-		chatID: ns,
+
+	c := make(chan time.Time)
+
+	cancel := make(chan struct{})
+	go func() {
+		c <- time.Now()
+		cancel <- struct{}{}
+	}()
+
+	var sent []*Notification
+	r.sendNofication = func(n *Notification) error {
+		sent = append(sent, n)
+		return nil
 	}
-	if !reflect.DeepEqual(gotAll, wantAll) {
-		t.Errorf("settings.GetAll() got: %v want: %v", gotAll, wantAll)
+
+	r.Loop(c, cancel)
+
+	if len(sent) != 1 {
+		t.Errorf("got %d notifications (%v), want 1", len(sent), sent)
 	}
 }
