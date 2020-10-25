@@ -6,12 +6,12 @@
   },
   {
     "Send": "many words",
-    "Want": "Couldn't process your message \"many words\"",
+    "Want": "For now this bot doesn't work with expressions. Try entering a single work without spaces.",
     "WantButtons": null
   },
   {
     "Send": "oijasdki#noresults#",
-    "Want": "Couldn't find definitions",
+    "Want": "Couldn't find definitions.",
     "WantButtons": null
   },
   {
@@ -21,14 +21,14 @@
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
     "WantButtons": [
       "Learn"
     ]
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
     "WantButtons": [
       "Learn"
     ]
@@ -40,7 +40,7 @@
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figuratively\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figuratively\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figuratively, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
+    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. Én vagyok a család fekete báránya\\.\n  _I'm the black sheep of the family\\._\n\n2\\. A vörös ruhás nő figyelmen kívül hagyta a fekete ruhás férfit, és mobilon felhívta egy barátját\\.\n  _The girl in the red dress ignored the man dressed in black and called a friend on her cellphone\\._\n\n3\\. Két kis nyuszi, egy fehér nyuszi meg egy fekete élt egy nagy erdőben\\.",
     "WantButtons": [
       "Reset progress"
     ]
@@ -63,10 +63,8 @@
   },
   {
     "Send": "/settings",
-    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
-    "WantButtons": [
-      "Input Language"
-    ]
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\nTime Zone: UTC\n\nTo modify settings use one of the commands below:\n  /language\n  /timezone\n",
+    "WantButtons": null
   },
   {
     "Send": "/practice",
@@ -91,7 +89,7 @@
   },
   {
     "Send": "falu",
-    "Want": "*falu*\n\n1\\. \\[*noun*\\] village\n\nUsage examples:\n\n1\\. Minden falu egy személyt delegálhatott\\.\n\n2\\. Mindegyik falu szép volt\\.\n\n3\\. A gátépítés előtt egy falu volt itt\\.",
+    "Want": "*falu*\n\n1\\. \\[*noun*\\] village\nA világ egy falu\\.The world is a village\\.\nSynonym: község\nHypernyms: település, helység\nHyponyms: törpefalu \\(\u003c100\\), aprófalu \\(100–500\\), kisfalu \\(500–1,000\\), középfalu \\(1,000–2,000\\), nagyfalu \\(2,000–5,000\\), óriásfalu \\(5,000–10,000 of population\\)\nCoordinate term: város \\(town or city\\)\n\nUsage examples:\n\n1\\. Minden falu egy személyt delegálhatott\\.\n\n2\\. Mindegyik falu szép volt\\.\n\n3\\. A gátépítés előtt egy falu volt itt\\.",
     "WantButtons": [
       "Learn"
     ]
@@ -119,69 +117,66 @@
   },
   {
     "Send": "/stop",
-    "Want": "Stopped practice",
+    "Want": "Stopped. Input the word to get it's definition.",
     "WantButtons": null
   },
   {
     "Send": "/settings",
-    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
-    "WantButtons": [
-      "Input Language"
-    ]
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\nTime Zone: UTC\n\nTo modify settings use one of the commands below:\n  /language\n  /timezone\n",
+    "WantButtons": null
   },
   {
-    "Send": "b:Input Language",
-    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "Send": "/language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"German\",\"Hungarian\"",
     "WantButtons": null
   },
   {
     "Send": "NotARealLanguage",
-    "Want": "Unsupported language. Try again.",
+    "Want": "Unsupported language \"NotARealLanguage\". Please try again.",
     "WantButtons": null
   },
   {
     "Send": "English",
-    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
-    "WantButtons": [
-      "Input Language"
-    ]
+    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\nTime Zone: UTC\n\nTo modify settings use one of the commands below:\n  /language\n  /timezone\n",
+    "WantButtons": null
   },
   {
     "Send": "/stop",
-    "Want": "Exited settings",
+    "Want": "Stopped. Input the word to get it's definition.",
     "WantButtons": null
   },
   {
     "Send": "/settings",
-    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
-    "WantButtons": [
-      "Input Language"
-    ]
+    "Want": "\nCurrent settings:\n\nInput language: \"English\"\nInput language in ISO 639-3: \"eng\"\nTranslation languages in ISO 639-3: \"rus\",\"ukr\"\nTime Zone: UTC\n\nTo modify settings use one of the commands below:\n  /language\n  /timezone\n",
+    "WantButtons": null
   },
   {
-    "Send": "b:Input Language",
-    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "Send": "/language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"German\",\"Hungarian\"",
     "WantButtons": null
   },
   {
     "Send": "Hungarian",
-    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\n\nChoose setting which you want to modify.\n(The choice might improve in the future.)\n",
-    "WantButtons": [
-      "Input Language"
-    ]
+    "Want": "\nCurrent settings:\n\nInput language: \"Hungarian\"\nInput language in ISO 639-3: \"hun\"\nTranslation languages in ISO 639-3: \"eng\",\"rus\",\"ukr\"\nTime Zone: UTC\n\nTo modify settings use one of the commands below:\n  /language\n  /timezone\n",
+    "WantButtons": null
   },
   {
-    "Send": "b:Input Language",
-    "Want": "Enter input language of your choice. Supported are \"English\",\"Hungarian\"",
+    "Send": "/language",
+    "Want": "Enter input language of your choice. Supported are \"English\",\"German\",\"Hungarian\"",
     "WantButtons": null
   },
   {
     "Send": "/stop",
-    "Want": "Exited settings",
+    "Want": "Stopped. Input the word to get it's definition.",
     "WantButtons": null
   },
   {
-    "Send": "/delete falu",
+    "Send": "/delete",
+    "Want": "Enter the word you want to delete from learning!",
+    "WantButtons": null
+  },
+  {
+    "Send": "falu",
     "Want": "Deleted \"falu\"!",
     "WantButtons": null
   },
@@ -192,21 +187,26 @@
   },
   {
     "Send": "/add",
-    "Want": "\nEnter the card you want to add in the format:\n\u003cfront of the card (word, expression, question)\u003e\n\u003cback of the card (can be multiline)\u003e\n",
+    "Want": "Enter front of the card (word, expression, question).",
     "WantButtons": null
   },
   {
     "Send": "/stop",
-    "Want": "Cancelled addition",
+    "Want": "Stopped. Input the word to get it's definition.",
     "WantButtons": null
   },
   {
     "Send": "/add",
-    "Want": "\nEnter the card you want to add in the format:\n\u003cfront of the card (word, expression, question)\u003e\n\u003cback of the card (can be multiline)\u003e\n",
+    "Want": "Enter front of the card (word, expression, question).",
     "WantButtons": null
   },
   {
-    "Send": "cardfront\ncardback (definitions or what not)",
+    "Send": "cardfront",
+    "Want": "Enter back of the card (definition, answer).",
+    "WantButtons": null
+  },
+  {
+    "Send": "cardback (definitions or what not)",
     "Want": "Added \"cardfront\" for learning!",
     "WantButtons": null
   },

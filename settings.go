@@ -137,26 +137,45 @@ func (c *SettingsConfig) Set(chatID int64, s *Settings) error {
 	return nil
 }
 
+func (c *SettingsConfig) ValidateLanguage(language string) error {
+	_, ok := SupportedInputLanguages[language]
+	if !ok {
+		return fmt.Errorf("unsupported language %q", language)
+	}
+	return nil
+}
+
 func (c *SettingsConfig) SetLanguage(chatid int64, language string) error {
 	currentSettings, err := c.Get(chatid)
-	if err == nil {
-		languageSettings, ok := SupportedInputLanguages[language]
-		if !ok {
-			return fmt.Errorf("unsupported language %q", language)
-		}
-		currentSettings.InputLanguage = languageSettings.InputLanguage
-		currentSettings.InputLanguageISO639_3 = languageSettings.InputLanguageISO639_3
-		currentSettings.TranslationLanguages = languageSettings.TranslationLanguages
-		return c.Set(chatid, currentSettings)
+	if err != nil {
+		return err
+	}
+	if err := c.ValidateLanguage(language); err != nil {
+		return err
+	}
+	languageSettings := SupportedInputLanguages[language]
+	currentSettings.InputLanguage = languageSettings.InputLanguage
+	currentSettings.InputLanguageISO639_3 = languageSettings.InputLanguageISO639_3
+	currentSettings.TranslationLanguages = languageSettings.TranslationLanguages
+	return c.Set(chatid, currentSettings)
+}
+
+func (c *SettingsConfig) ValidateTimeZone(tz string) error {
+	set := TimeZones[tz]
+	if !set {
+		return fmt.Errorf("unsupported time zone (format should be UTC, UTC+X or UTC-X)")
 	}
 	return nil
 }
 
 func (c *SettingsConfig) SetTimeZone(chatid int64, tz string) error {
-	currentSettings, err := c.Get(chatid)
-	if err == nil {
-		currentSettings.TimeZone = tz
-		return c.Set(chatid, currentSettings)
+	if err := c.ValidateTimeZone(tz); err != nil {
+		return err
 	}
-	return nil
+	currentSettings, err := c.Get(chatid)
+	if err != nil {
+		return err
+	}
+	currentSettings.TimeZone = tz
+	return c.Set(chatid, currentSettings)
 }
