@@ -87,7 +87,7 @@ b:Don't know
 
 /settings
 
-b:Input Language
+/language
 
 NotARealLanguage
 
@@ -97,15 +97,17 @@ English
 
 /settings
 
-b:Input Language
+/language
 
 Hungarian
 
-b:Input Language
+/language
 
 /stop
 
-/delete falu
+/delete
+
+falu
 
 /practice
 
@@ -116,6 +118,7 @@ b:Input Language
 /add
 
 cardfront
+
 cardback (definitions or what not)
 
 cardfront

@@ -42,11 +42,6 @@ const (
 const UsePractice = PracticeKnowledge
 
 var (
-	SupportedInputLanguages map[string]Settings
-	TimeZones               map[string]bool
-)
-
-func init() {
 	SupportedInputLanguages = map[string]Settings{
 		"Hungarian": Settings{
 			InputLanguage:         "Hungarian",
@@ -83,7 +78,7 @@ func init() {
 		timeZones["UTC"] = true
 		return timeZones
 	}()
-}
+)
 
 type CallbackAction int
 
@@ -91,7 +86,7 @@ const (
 	SaveWordAction CallbackAction = iota
 	PracticeKnowAction
 	PracticeDontKnowAction
-	ChangeSettingAction
+	PracticeDontKnowActionNoPractice
 )
 
 // Make sure all fields are Public, otherwise encoding will not work
@@ -124,10 +119,7 @@ func (c CallbackInfo) String() string {
 
 type Commander struct {
 	*Clients
-	// chat_id -> Available Actions
-	actions map[int64][]Action
-	// Actions that should be always available.
-	baseActions []Action
+	bot *Bot
 }
 
 type CommanderOptions struct {
@@ -211,18 +203,12 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	log.Printf("getMe: %s", string(raw))
 
 	return &Commander{
-		Clients:     c,
-		actions:     make(map[int64][]Action),
-		baseActions: BaseActions(c),
+		Clients: c,
+		bot: &Bot{
+			state:   &State{c},
+			command: make(map[int64]Command),
+		},
 	}, nil
-}
-
-func (c *Commander) Actions(chatId int64) []Action {
-	a, ok := c.actions[chatId]
-	if !ok {
-		a = DefaultActions(c.Clients)
-	}
-	return append(a, c.baseActions...)
 }
 
 // Update processes the user's update and spit out output.
@@ -230,29 +216,12 @@ func (c *Commander) Actions(chatId int64) []Action {
 // continue execution.
 // TODO: Use answerCallbackQuery to notify client that callback was processed?
 func (c *Commander) Update(u *Update) error {
-	chatId, err := u.ChatId()
+	err := c.bot.Update(u)
 	if err != nil {
 		// Not sure what to do otherwise, but crashing isn't nice.
-		log.Printf("INTENAL ERROR: {%+v}.ChatId(): %v", u, err)
-		return nil
+		log.Printf("INTENAL ERROR for update %v: %v", u, err)
 	}
-	for _, a := range c.Actions(chatId) {
-		if a.Match(u) {
-			na, err := a.Perform(u)
-			// FIXME: on error maybe some action changes are warranted?
-			if err != nil {
-				// FIXME: Don't return an error here!!! Display it.
-				return err
-			}
-			// FIXME seems annoying to keep track of current actions when on wron
-			// input the set of actions should never change.
-			if len(na) > 0 {
-				c.actions[chatId] = na
-			}
-			return nil
-		}
-	}
-	return fmt.Errorf("Did not process an update: %v!", u.CallbackQuery)
+	return nil
 }
 
 func (c *Commander) PollAndProcess() error {
