@@ -3,7 +3,9 @@ secret.go
 *.swo
 db.sql
 words
+migrate/migrate
 words_image.tar
+loader_image.tar
 data/*.csv
 data/*.bz2
 commands.md
