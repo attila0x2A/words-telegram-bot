@@ -66,6 +66,7 @@ func (d *Definer) Define(word string, settings *Settings) (ds []string, err erro
 	ex, err := d.usage.FetchExamples(word, settings.InputLanguageISO639_3, settings.TranslationLanguages)
 	if err != nil {
 		ex = nil
+		log.Printf("ERROR: FetchExamples(%s): %v", word, err)
 		log.Printf("WARNING Did not find usage examples for %q", word)
 	}
 	msg := "*" + escapeMarkdown(word) + "*\n"

@@ -18,6 +18,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -131,17 +132,24 @@ cardfront
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
-	db := filepath.Join(dir, "tmpdb")
+	dbPath := filepath.Join(dir, "tmpdb")
+
+	// Initiate db with some usage examples.
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(usageSQL); err != nil {
+		t.Fatal(err)
+	}
 
 	fk := startFakeTelegram(t)
 	defer fk.server.Close()
 	tm := &Telegram{hc: *fk.server.Client()}
 
 	c, err := NewCommander(tm, &CommanderOptions{
-		useCache:      true,
-		dbPath:        db,
-		sentencesPath: "./testdata/sentences.csv",
-		linksPath:     "./testdata/links.csv",
+		useCache: true,
+		dbPath:   dbPath,
 		stages: []time.Duration{
 			0,
 			2 * time.Minute,
