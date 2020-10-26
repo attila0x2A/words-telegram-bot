@@ -1,0 +1,15 @@
+*.swp
+*.swo
+db.sql
+words
+migrate/migrate
+words_image.tar
+loader_image.tar
+data/*.bz2
+commands.md
+cover.out
+testdata/*
+backups/*
+.vscode
+.git
+.cache
