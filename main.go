@@ -43,10 +43,8 @@ func main() {
 	log.Printf("db_path: %q", *db)
 	ctx := context.Background()
 	opts := &CommanderOptions{
-		useCache:      false,
-		dbPath:        *db,
-		sentencesPath: "./data/sentences.csv",
-		linksPath:     "./data/links.csv",
+		useCache: false,
+		dbPath:   *db,
 		stages: []time.Duration{
 			20 * time.Second,
 			1 * time.Hour * 23,
