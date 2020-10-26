@@ -28,6 +28,5 @@ FROM scratch
 # solution?
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/bin/words /go/bin/words
-COPY data/*.csv data/
 # TODO: This should be moved to the CMD starting it up.
 ENTRYPOINT ["/go/bin/words", "--db_path=/words-vol/db/db.sql"]

@@ -123,11 +123,9 @@ type Commander struct {
 }
 
 type CommanderOptions struct {
-	useCache      bool
-	dbPath        string
-	stages        []time.Duration
-	sentencesPath string
-	linksPath     string // links between sentence and translations
+	useCache bool
+	dbPath   string
+	stages   []time.Duration
 }
 
 func escapeMarkdown(s string) string {
@@ -168,10 +166,7 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	}
 	// TODO: Can use errgroup if there is a need to paralelize. This is the
 	// slowest step in initialization.
-	uf, err := NewUsageFetcher(UsageFetcherOptions{
-		SentencesPath: opts.sentencesPath,
-		LinksPath:     opts.linksPath,
-	})
+	uf, err := NewUsageFetcher(opts.dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("creating usage fetcher: %w", err)
 	}
