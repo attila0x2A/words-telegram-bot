@@ -32,19 +32,35 @@ func Start(ctx context.Context, opts *CommanderOptions) error {
 	if err != nil {
 		return err
 	}
-
-	return c.Start()
+	if opts.push {
+		return c.StartPush(opts)
+	} else {
+		return c.StartPoll()
+	}
 }
 
 func main() {
 	log.SetFlags(log.Flags() | log.Lshortfile)
+
 	db := flag.String("db_path", "./db.sql", "Path to the persistent sqlite3 database.")
+
+	push := flag.Bool("push", false, "If true will register webhook, otherwise will rely on polling to get updates.")
+	ip := flag.String("ip", "", "IP address of the server. Needed only if push is set to true.")
+	port := flag.Int("port", 8443, "Port of which webhook should listen. Needed only if push is set to true.")
+	cert := flag.String("cert_path", "webhook.crt", "TLS certificate. Needed only if push is set to true.")
+	key := flag.String("key_path", "webhook.key", "Private key for TLS. Needed only if push is set to true.")
+
 	flag.Parse()
 	log.Printf("db_path: %q", *db)
 	ctx := context.Background()
 	opts := &CommanderOptions{
 		useCache: false,
 		dbPath:   *db,
+		port:     *port,
+		certPath: *cert,
+		keyPath:  *key,
+		ip:       *ip,
+		push:     *push,
 		stages: []time.Duration{
 			20 * time.Second,
 			1 * time.Hour * 23,

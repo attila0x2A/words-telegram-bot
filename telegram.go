@@ -21,8 +21,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
 )
 
 // Note that BotToken comes from a file not in a git repository.
@@ -109,9 +112,12 @@ func (t *Telegram) Call(method string, req, res interface{}) error {
 	if err != nil {
 		return err
 	}
+	return t.callHandleResponse(r, res)
+}
 
+func (t *Telegram) callHandleResponse(r *http.Response, res interface{}) error {
 	b := new(bytes.Buffer)
-	if _, err = b.ReadFrom(r.Body); err != nil {
+	if _, err := b.ReadFrom(r.Body); err != nil {
 		return err
 	}
 	if r.StatusCode != 200 {
@@ -185,4 +191,60 @@ func (t *Telegram) AnswerCallbackLog(id string, text string) {
 	if err := t.AnswerCallback(id, text); err != nil {
 		log.Printf("Error answering callback: %w", err)
 	}
+}
+
+func (t *Telegram) SetWebhook(url string, certPath string) error {
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+
+	if certPath != "" {
+		cert, err := os.Open(certPath)
+		if err != nil {
+			return err
+		}
+		defer cert.Close()
+		fw, err := w.CreateFormFile("certificate", cert.Name())
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(fw, cert); err != nil {
+			return err
+		}
+	}
+	if err := w.WriteField("url", url); err != nil {
+		return err
+	}
+	// TODO: Support more than 1 connection. 1 for now because not everything
+	// is safe for concurrent access.
+	if err := w.WriteField("max_connections", "1"); err != nil {
+		return err
+	}
+	w.Close()
+
+	req, err := http.NewRequest("POST", methodURL("setWebhook"), &b)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	res, err := t.hc.Do(req)
+	if err != nil {
+		return err
+	}
+	var success bool
+	if err := t.callHandleResponse(res, &success); err != nil {
+		return err
+	}
+	if !success {
+		return fmt.Errorf("Setting webhook was unsuccessful!")
+	}
+	return nil
+}
+
+func (t *Telegram) LogWebhookInfo() {
+	raw := json.RawMessage{}
+	if err := t.Call("getWebhookInfo", nil, &raw); err != nil {
+		log.Printf("getWebhhokInfo failed: %v", err)
+	}
+	log.Printf("getWebhhokInfo: %s", string(raw))
 }
