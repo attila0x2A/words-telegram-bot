@@ -14,6 +14,8 @@
 package main
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -125,6 +127,11 @@ type Commander struct {
 type CommanderOptions struct {
 	useCache bool
 	dbPath   string
+	port     int
+	certPath string
+	keyPath  string
+	ip       string
+	push     bool
 	stages   []time.Duration
 }
 
@@ -245,9 +252,66 @@ func (c *Commander) PollAndProcess() error {
 	return nil
 }
 
+func (c *Commander) handleUpdate(req *http.Request) error {
+	if req.Method != "POST" {
+		return fmt.Errorf("want POST; got %s", req.Method)
+	}
+	b := new(bytes.Buffer)
+	if _, err := b.ReadFrom(req.Body); err != nil {
+		return fmt.Errorf("reading body of req %v: %v", req, err)
+	}
+	var update Update
+	if err := json.Unmarshal(b.Bytes(), &update); err != nil {
+		return fmt.Errorf("json.Unmarshal(%q): %w", b.String(), err)
+	}
+	return c.Update(&update)
+}
+
+func (c *Commander) WebhookCallback(w http.ResponseWriter, req *http.Request) {
+	if err := c.handleUpdate(req); err != nil {
+		log.Printf("INTERNAL ERROR[Webhook]: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (c *Commander) StartPush(opts *CommanderOptions) error {
+	addr := fmt.Sprintf("https://%s:%d/%s", opts.ip, opts.port, BotToken)
+	if err := c.Telegram.SetWebhook(addr, opts.certPath); err != nil {
+		return err
+	}
+	c.Telegram.LogWebhookInfo()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+BotToken, c.WebhookCallback)
+	cfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", opts.port),
+		Handler:      mux,
+		TLSConfig:    cfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
+	log.Printf("Starting serving on %s", addr)
+	return srv.ListenAndServeTLS(opts.certPath, opts.keyPath)
+}
+
 // TODO: Accept time.Ticker channel -> Will give an ability to inline
 // PollAndProcess and test Start in addition to the rest.
-func (c *Commander) Start() error {
+func (c *Commander) StartPoll() error {
+	// Reset webhook, otherwise getUpdates would not work!
+	if err := c.Telegram.SetWebhook("", ""); err != nil {
+		return err
+	}
+	c.Telegram.LogWebhookInfo()
 	for {
 		if err := c.PollAndProcess(); err != nil {
 			return err
