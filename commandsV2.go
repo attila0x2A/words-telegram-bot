@@ -389,7 +389,7 @@ Time Zone: %s
 
 To modify settings use one of the commands below:
 %s
-`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone, strings.Join(cmds, "\n"))
+`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), LocationFromOffset(s.TimeZoneOffset), strings.Join(cmds, "\n"))
 	return state.Telegram.SendMessage(NewMessageReply(chatID, msg, nil))
 }
 

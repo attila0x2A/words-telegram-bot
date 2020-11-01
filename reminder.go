@@ -20,6 +20,8 @@ import (
 	"time"
 )
 
+var timeNow = time.Now
+
 type Notification struct {
 	ChatID int64
 }
@@ -46,8 +48,7 @@ func NewReminder(c *Clients, db *sql.DB) (*Reminder, error) {
 	return &Reminder{
 		db: db,
 		sendNofication: func(n *Notification) error {
-			log.Printf("Notification: %v", n)
-			return nil
+			return c.Telegram.SendTextMessage(n.ChatID, "Please do practice!")
 		},
 		fetchSettings: c.Settings.GetAll,
 	}, nil
@@ -65,6 +66,8 @@ func (r *Reminder) LastReminderTime(chatID int64) (time.Time, error) {
 		u = 0
 		if err != sql.ErrNoRows {
 			err = fmt.Errorf("INTERNAL: retrieving last_reminder_time_seconds for chat id %d: %w", chatID, err)
+		} else {
+			err = nil
 		}
 	}
 	return time.Unix(u, 0), err
@@ -74,35 +77,24 @@ func (r *Reminder) UpdateLastReminderTime(chatID int64) error {
 	_, err := r.db.Exec(`
 		INSERT OR REPLACE INTO Reminders(chat_id, last_reminder_time_seconds) VALUES
 		($0, $1);`,
-		chatID, time.Now().Unix())
+		chatID, timeNow().Unix())
 	if err != nil {
 		return fmt.Errorf("INTERNAL: Failed updating reminder_time: %w", err)
 	}
 	return nil
 }
 
+// TODO: Pass context directly into Loop.
 func (r *Reminder) Loop(ticker <-chan time.Time, cancel <-chan struct{}) {
 	for {
 		cs, err := r.fetchSettings()
 		if err != nil {
 			log.Printf("ERROR: fetchSettings: %v", err)
 		}
-		// TODO: Take into account availability window, reminder frequency and timezone.
-		// newReminderTime = lastReminder + (aval window size)/Frequency
-		for chatID, _ := range cs {
-			const frequency = 1
-			rt, err := r.LastReminderTime(chatID)
+		for chatID, settings := range cs {
+			err := r.TrySendNotification(chatID, settings)
 			if err != nil {
 				log.Print(err)
-			}
-			newRT := rt.Add(24 / frequency * time.Hour)
-			if time.Now().After(newRT) {
-				if err := r.sendNofication(&Notification{chatID}); err != nil {
-					log.Print(err)
-				}
-				if err := r.UpdateLastReminderTime(chatID); err != nil {
-					log.Print(err)
-				}
 			}
 		}
 		select {
@@ -111,4 +103,55 @@ func (r *Reminder) Loop(ticker <-chan time.Time, cancel <-chan struct{}) {
 			return
 		}
 	}
+}
+
+func (r *Reminder) TrySendNotification(chatID int64, settings *Settings) error {
+	// TODO: Allow user to setup reminder frequency.
+	const frequency = 1
+	rt, err := r.LastReminderTime(chatID)
+	if err != nil {
+		return err
+	}
+	newRT := rt.Add(24 / frequency * time.Hour)
+
+	// TODO: Relying on the time received from ticker instead will be much
+	// easier to test!
+	now := timeNow()
+
+	if !now.After(newRT) {
+		return nil
+	}
+
+	nowLocal := now.In(LocationFromOffset(settings.TimeZoneOffset))
+	// FIXME: If user doesn't have availibility window configured we should not
+	// send notifications. Currently we do so since there is no way to
+	// configure them for existing users.
+	if len(settings.AvailibilityWindows) == 0 {
+		settings.AvailibilityWindows = DefaultSettings().AvailibilityWindows
+	}
+	for _, window := range settings.AvailibilityWindows {
+
+		if window.Contains(nowLocal) {
+			if err := r.sendNofication(&Notification{chatID}); err != nil {
+				return err
+			}
+			if err := r.UpdateLastReminderTime(chatID); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+// LocationFromOffset creates time.Location from offset in seconds.
+// TODO: Use time.LoadLocation instead of this!
+func LocationFromOffset(offset int) *time.Location {
+	var zone string
+	if offset == 0 {
+		zone = "UTC"
+	} else {
+		zone = fmt.Sprintf("UTC%+d", offset/(60*60))
+	}
+	return time.FixedZone(zone, offset)
 }

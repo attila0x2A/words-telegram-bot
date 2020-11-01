@@ -72,12 +72,12 @@ var (
 			},
 		},
 	}
-	TimeZones = func() map[string]bool {
-		timeZones := make(map[string]bool)
+	TimeZones = func() map[string]int {
+		timeZones := make(map[string]int)
 		for i := -12; i < 12; i++ {
-			timeZones[fmt.Sprintf("UTC%+d", i)] = true
+			timeZones[fmt.Sprintf("UTC%+d", i)] = i * 60 * 60
 		}
-		timeZones["UTC"] = true
+		timeZones["UTC"] = 0
 		return timeZones
 	}()
 )

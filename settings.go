@@ -17,6 +17,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type Settings struct {
@@ -30,9 +31,25 @@ type Settings struct {
 	// which to accept the translations.
 	// true if translation is accepted
 	TranslationLanguages map[string]bool
-	// TimeZone should be from IANA time zone database, e. g. America/New_York
-	// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-	TimeZone string
+	// TimeZoneOffset is UTC offset in seconds
+	TimeZoneOffset      int
+	AvailibilityWindows []AvailabilityWindow
+}
+
+type AvailabilityWindow struct {
+	// StartSeconds indicate the start of availibility window in seconds after day start
+	StartSeconds int64
+	// EndSeconds indicate the end of availibility window in seconds after day start
+	EndSeconds int64
+}
+
+func (w *AvailabilityWindow) Contains(t time.Time) bool {
+	year, month, day := t.Year(), t.Month(), t.Day()
+	start := time.Date(year, month, day, 0,
+		0, int(w.StartSeconds), 0, t.Location())
+	end := time.Date(year, month, day, 0,
+		0, int(w.EndSeconds), 0, t.Location())
+	return t.After(start) && t.Before(end)
 }
 
 func SettingsFromString(s string) *Settings {
@@ -52,7 +69,13 @@ func DefaultSettings() *Settings {
 			"rus": true,
 			"ukr": true,
 		},
-		TimeZone: "UTC",
+		TimeZoneOffset: 0,
+		AvailibilityWindows: []AvailabilityWindow{
+			{
+				StartSeconds: 10 * 60 * 60,
+				EndSeconds:   19 * 60 * 60,
+			},
+		},
 	}
 }
 
@@ -161,7 +184,7 @@ func (c *SettingsConfig) SetLanguage(chatid int64, language string) error {
 }
 
 func (c *SettingsConfig) ValidateTimeZone(tz string) error {
-	set := TimeZones[tz]
+	_, set := TimeZones[tz]
 	if !set {
 		return fmt.Errorf("unsupported time zone (format should be UTC, UTC+X or UTC-X)")
 	}
@@ -176,6 +199,7 @@ func (c *SettingsConfig) SetTimeZone(chatid int64, tz string) error {
 	if err != nil {
 		return err
 	}
-	currentSettings.TimeZone = tz
+	offset := TimeZones[tz]
+	currentSettings.TimeZoneOffset = offset
 	return c.Set(chatid, currentSettings)
 }
