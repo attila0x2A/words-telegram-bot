@@ -211,7 +211,7 @@ Time Zone: %s
 
 Choose setting which you want to modify.
 (The choice might improve in the future.)
-`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone)
+`, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), LocationFromOffset(s.TimeZoneOffset))
 	return []Action{
 			// Note that stop should be handled before input language is!
 			&StopAction{a.Clients, "Exited settings"},
@@ -327,11 +327,14 @@ type PickTimeZoneAction struct {
 func (a *PickTimeZoneAction) Perform(u *Update) ([]Action, error) {
 	m := u.Message
 	chatId := m.Chat.Id
-	set := TimeZones[m.Text]
-	if !set {
+	_, ok := TimeZones[m.Text]
+	if !ok {
 		return nil, a.Telegram.SendTextMessage(chatId, "Unsupported time zone. Try again (format should be UTC, UTC+X or UTC-X).")
 	}
-	a.Settings.SetTimeZone(chatId, m.Text)
+	err := a.Settings.SetTimeZone(chatId, m.Text)
+	if err != nil {
+		return nil, a.Telegram.SendTextMessage(chatId, fmt.Sprintf("%v. Try again", err))
+	}
 	sa := SettingsAction{a.Clients}
 	return sa.Perform(u)
 }
@@ -644,7 +647,7 @@ func (a *DefineWordAction) Perform(u *Update) ([]Action, error) {
 	ds, err := a.Definer.Define(m.Text, settings)
 	if err != nil {
 		// TODO: Might be good to post debug logs to the reply in the debug mode.
-		log.Printf("Error fetching the definition: %w", err)
+		log.Printf("Error fetching the definition: %v", err)
 		// FIXME: Add search url to the reply?
 		return nil, a.Telegram.SendTextMessage(chatId, "Couldn't find definitions")
 	}

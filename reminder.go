@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var timeNow = time.Now
+
 type Notification struct {
 	ChatID int64
 }
@@ -52,6 +54,8 @@ func (r *Reminder) LastReminderTime(chatID int64) (time.Time, error) {
 		u = 0
 		if err != sql.ErrNoRows {
 			err = fmt.Errorf("INTERNAL: retrieving last_reminder_time_seconds for chat id %d: %w", chatID, err)
+		} else {
+			err = nil
 		}
 	}
 	return time.Unix(u, 0), err
@@ -61,7 +65,7 @@ func (r *Reminder) UpdateLastReminderTime(chatID int64) error {
 	_, err := r.db.Exec(`
 		INSERT OR REPLACE INTO Reminders(chat_id, last_reminder_time_seconds) VALUES
 		($0, $1);`,
-		chatID, time.Now().Unix())
+		chatID, timeNow().Unix())
 	if err != nil {
 		return fmt.Errorf("INTERNAL: Failed updating reminder_time: %w", err)
 	}
@@ -76,20 +80,11 @@ func (r *Reminder) Loop(ticker <-chan time.Time, cancel <-chan struct{}) {
 		}
 		// TODO: Take into account availability window, reminder frequency and timezone.
 		// newReminderTime = lastReminder + (aval window size)/Frequency
-		for chatID, _ := range cs {
-			const frequency = 1
-			rt, err := r.LastReminderTime(chatID)
+		for chatID, settings := range cs {
+
+			err := r.TrySendNotification(chatID, settings)
 			if err != nil {
 				log.Print(err)
-			}
-			newRT := rt.Add(24 / frequency * time.Hour)
-			if time.Now().After(newRT) {
-				if err := r.sendNofication(&Notification{chatID}); err != nil {
-					log.Print(err)
-				}
-				if err := r.UpdateLastReminderTime(chatID); err != nil {
-					log.Print(err)
-				}
 			}
 		}
 		select {
@@ -98,4 +93,38 @@ func (r *Reminder) Loop(ticker <-chan time.Time, cancel <-chan struct{}) {
 			return
 		}
 	}
+}
+
+func (r *Reminder) TrySendNotification(chatID int64, settings *Settings) error {
+	const frequency = 1
+	rt, err := r.LastReminderTime(chatID)
+	if err != nil {
+		return err
+	}
+	newRT := rt.Add(24 / frequency * time.Hour)
+
+	now := timeNow()
+
+	if !now.After(newRT) {
+		return nil
+	}
+
+	nowLocal := now.In(LocationFromOffset(settings.TimeZoneOffset))
+	for _, window := range settings.AvailibilityWindows {
+
+		if window.Contains(nowLocal) {
+			if err := r.sendNofication(&Notification{chatID}); err != nil {
+				return err
+			}
+			if err := r.UpdateLastReminderTime(chatID); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+func LocationFromOffset(offset int) *time.Location {
+	return time.FixedZone(fmt.Sprintf("UTC-%d", offset/(60*60)), offset)
 }

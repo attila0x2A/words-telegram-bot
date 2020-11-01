@@ -183,6 +183,6 @@ func (t *Telegram) AnswerCallback(id string, text string) error {
 
 func (t *Telegram) AnswerCallbackLog(id string, text string) {
 	if err := t.AnswerCallback(id, text); err != nil {
-		log.Printf("Error answering callback: %w", err)
+		log.Printf("Error answering callback: %v", err)
 	}
 }

@@ -46,12 +46,12 @@ func (d *Definer) Define(word string, settings *Settings) (ds []string, err erro
 				return
 			}
 			if err := d.cache.Save(word, word, strings.Join(ds, separator)); err != nil {
-				log.Printf("cache.Save(%q): %w", word, err)
+				log.Printf("cache.Save(%q): %v", word, err)
 			}
 		}()
 	} else {
 		// At this point err != nil
-		log.Printf("ERROR: cache.Lookup(%q): %w", word, err)
+		log.Printf("ERROR: cache.Lookup(%q): %v", word, err)
 	}
 
 	p := WikiParser{
