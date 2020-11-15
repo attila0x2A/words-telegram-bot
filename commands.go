@@ -102,7 +102,7 @@ type CallbackInfo struct {
 	Setting string
 }
 
-// FIXME: Should return an error?
+// FIXME: Should return an error!
 func CallbackInfoFromString(s string) CallbackInfo {
 	var c CallbackInfo
 	if err := json.Unmarshal([]byte(s), &c); err != nil {

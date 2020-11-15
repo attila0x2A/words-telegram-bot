@@ -23,9 +23,7 @@ import "fmt"
 // reset progress should probably be renamed to practise sooner.
 //	* equivalent to again.
 
-type KnowCallback struct {
-	Word string
-}
+type KnowCallback struct{}
 
 func (KnowCallback) Call(s *State, q *CallbackQuery) error {
 	defer s.Telegram.AnswerCallbackLog(q.Id, "")
@@ -37,32 +35,23 @@ func (KnowCallback) Call(s *State, q *CallbackQuery) error {
 		return err
 	}
 
-	if err := flipWordCard(s.Clients, word, q.Message, []*InlineKeyboard{DontKnowCallback{word, false}.AsInlineKeyboard()}); err != nil {
+	if err := flipWordCard(s.Clients, word, q.Message, []*InlineKeyboard{resetProgressIK(word)}); err != nil {
 		return err
 	}
 	return practiceReply(s, chatID)
 }
 
-func (KnowCallback) Match(s *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == PracticeKnowAction
-}
-
-func (k KnowCallback) AsInlineKeyboard() *InlineKeyboard {
+func knowIK(word string) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Know",
 		CallbackData: CallbackInfo{
 			Action: PracticeKnowAction,
-			Word:   k.Word,
+			Word:   word,
 		}.String(),
 	}
 }
 
-type DontKnowCallback struct {
-	Word string
-	// If true when clicking another practice card will be shown.
-	Practice bool
-}
+type DontKnowCallback struct{}
 
 func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 	defer s.Telegram.AnswerCallbackLog(q.Id, "Reset progress")
@@ -84,52 +73,27 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 	return practiceReply(s, chatID)
 }
 
-func (DontKnowCallback) Match(_ *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == PracticeDontKnowAction || info.Action == ResetProgressAction
-}
-
-func (c DontKnowCallback) AsInlineKeyboard() *InlineKeyboard {
-	a := ResetProgressAction
-	if c.Practice {
-		a = PracticeDontKnowAction
-	}
+func dontKnowIK(word string) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Don't know",
 		CallbackData: CallbackInfo{
-			Action: a,
-			Word:   c.Word,
+			Action: PracticeDontKnowAction,
+			Word:   word,
 		}.String(),
 	}
 }
 
-type ResetProgressCallback struct {
-	Word string
-}
-
-// ResetProgress type is just a convenience placeholder to create inline keyboards.
-// Logic will be handled by dont know callback.
-func (ResetProgressCallback) Call(_ *State, _ *CallbackQuery) error {
-	return nil
-}
-
-func (ResetProgressCallback) Match(_ *State, _ *CallbackQuery) bool {
-	return false
-}
-
-func (c ResetProgressCallback) AsInlineKeyboard() *InlineKeyboard {
+func resetProgressIK(word string) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Reset progress",
 		CallbackData: CallbackInfo{
 			Action: ResetProgressAction,
-			Word:   c.Word,
+			Word:   word,
 		}.String(),
 	}
 }
 
-type LearnCallback struct {
-	Word string
-}
+type LearnCallback struct{}
 
 func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 	// FIXME: Next 3 lines are very common.
@@ -157,17 +121,12 @@ func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 	return nil
 }
 
-func (LearnCallback) Match(_ *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == SaveWordAction
-}
-
-func (c LearnCallback) AsInlineKeyboard() *InlineKeyboard {
+func learnIK(word string) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Learn",
 		CallbackData: CallbackInfo{
 			Action: SaveWordAction,
-			Word:   c.Word,
+			Word:   word,
 		}.String(),
 	}
 }

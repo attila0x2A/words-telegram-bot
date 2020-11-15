@@ -30,8 +30,6 @@ import (
 
 type Callback interface {
 	Call(*State, *CallbackQuery) error
-	Match(*State, *CallbackQuery) bool
-	AsInlineKeyboard() *InlineKeyboard
 }
 
 type State struct {
@@ -105,12 +103,12 @@ func (b *Bot) Update(u *Update) (err error) {
 	}()
 
 	if u.CallbackQuery != nil {
-		for _, c := range CommandsTemplate.Callbacks {
-			if c.Match(b.state, u.CallbackQuery) {
-				return c.Call(b.state, u.CallbackQuery)
-			}
+		var c CallbackInfo
+		// Make sure that we can unmarshall, so that we don't panic accidentally later on.
+		if err = json.Unmarshal([]byte(u.CallbackQuery.Data), &c); err != nil {
+			return fmt.Errorf("Failed to unmarshal callback query %s: %w", u.CallbackQuery.Data, err)
 		}
-		return fmt.Errorf("INTERNAL ERROR: Did find a corresponding callback for callback query: %v", u.CallbackQuery)
+		return CommandsTemplate.Callback[c.Action].Call(b.state, u.CallbackQuery)
 	}
 
 	if u.Message == nil {
@@ -325,11 +323,7 @@ func ReplyCommand(reply func(s *State, chatID int64) error) CommandFactory {
 	)
 }
 
-func NewMessageReply(chatID int64, text string, callbacks []Callback) *MessageReply {
-	var ik []*InlineKeyboard
-	for _, c := range callbacks {
-		ik = append(ik, c.AsInlineKeyboard())
-	}
+func NewMessageReply(chatID int64, text string, ik ...*InlineKeyboard) *MessageReply {
 	var rm *ReplyMarkup
 	if len(ik) > 0 {
 		rm = &ReplyMarkup{
@@ -358,7 +352,7 @@ func practiceReply(s *State, chatID int64) error {
 	if err != nil {
 		return fmt.Errorf("retrieving word for repetition: %w", err)
 	}
-	return s.Telegram.SendMessage(NewMessageReply(chatID, word, []Callback{KnowCallback{word}, DontKnowCallback{word, true}}))
+	return s.Telegram.SendMessage(NewMessageReply(chatID, word, knowIK(word), dontKnowIK(word)))
 }
 
 // settingsReply sends current settings and instructions on how to change them.
@@ -390,7 +384,7 @@ Time Zone: %s
 To modify settings use one of the commands below:
 %s
 `, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone, strings.Join(cmds, "\n"))
-	return state.Telegram.SendMessage(NewMessageReply(chatID, msg, nil))
+	return state.Telegram.SendMessage(NewMessageReply(chatID, msg))
 }
 
 // This inteface is a bit redundant. We need it though to avoid initialization
@@ -521,8 +515,7 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	def, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
 	if err == nil {
 		return nil, s.Telegram.SendMessage(NewMessageReply(
-			m.Chat.Id, def,
-			[]Callback{ResetProgressCallback{m.Text}}))
+			m.Chat.Id, def, resetProgressIK(m.Text)))
 	}
 	if err != sql.ErrNoRows {
 		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)
@@ -548,7 +541,7 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 			ParseMode: "MarkdownV2",
 			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: [][]*InlineKeyboard{[]*InlineKeyboard{
-					LearnCallback{m.Text}.AsInlineKeyboard(),
+					learnIK(m.Text),
 				}},
 			},
 		}); err != nil {
@@ -620,8 +613,7 @@ var CommandsTemplate = struct {
 	// When receiving a callback it will be matched here.
 	// Tests should test that each callback is reachable.
 	// Callbacks can rely only on info got from the CallbackQuery,
-	// Everything stored in callback should be used only in AsInlineKeyboard method.
-	Callbacks []Callback
+	Callback map[CallbackAction]Callback
 	// Each key in the map should directly correspond to the name of the command.
 	// Possible improvement would be to allow regexps in the Commands name so
 	// arguments can be passed there.
@@ -645,10 +637,11 @@ var CommandsTemplate = struct {
 		},
 		SettingsCommands,
 	),
-	Callbacks: []Callback{
-		KnowCallback{},
-		DontKnowCallback{},
-		LearnCallback{},
+	Callback: map[CallbackAction]Callback{
+		PracticeKnowAction:     KnowCallback{},
+		PracticeDontKnowAction: DontKnowCallback{},
+		ResetProgressAction:    DontKnowCallback{},
+		SaveWordAction:         LearnCallback{},
 	},
 	DefaultCommand: func(string) Command { return defaultCommand{} },
 }
