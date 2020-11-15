@@ -116,31 +116,6 @@ func TestRepetition(t *testing.T) {
 	}
 	check(&row{chatId: chatId, word: "foo", definition: "foo is bar", ease: 250, ivl: 0})
 
-	t.Run("Answer", func(t *testing.T) {
-		// Answer is broken
-		t.Skip()
-		if _, err := r.AnswerWholeWord(chatId, d, "foo"); err != nil {
-			t.Fatal(err)
-		}
-		check(&row{chatId: chatId, word: "foo", definition: "foo is bar", ivl: 1})
-
-		corrected, err := r.AnswerWholeWord(chatId, d, "wrong")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if corrected != "foo" {
-			t.Errorf("got %q; want foo", corrected)
-		}
-		check(&row{chatId: chatId, word: "foo", definition: "foo is bar", ivl: 0})
-
-		for _, want := range []int64{1, 2, 3, 3, 3} {
-			if _, err := r.AnswerWholeWord(chatId, d, "foo"); err != nil {
-				t.Fatal(err)
-			}
-			check(&row{chatId: chatId, word: "foo", definition: "foo is bar", ivl: want})
-		}
-	})
-
 	if err := r.Answer(chatId, "foo", AnswerAgain); err != nil {
 		t.Fatal(err)
 	}

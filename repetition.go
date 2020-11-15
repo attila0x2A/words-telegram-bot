@@ -27,8 +27,6 @@ type Repetition struct {
 	initialEase int
 	initialIvl  int64
 	againDelay  time.Duration
-	// FIXME: Probably not needed here. Maybe only the number of stages.
-	stages []time.Duration
 }
 
 func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
@@ -175,47 +173,6 @@ func (r *Repetition) RepeatWord(chatID int64) (string, error) {
 	var w string
 	err := row.Scan(&w)
 	return w, err
-}
-
-// looks up definition and compares it to the word
-// FIXME: FIXME: FIXME: FIXME: This doesn't work!!!!!!!!
-//  cannot save obfuscated - cannot check.
-//  cannot save clear - cannot extract raw from obfuscated.
-//  this need fixing - make sure repetition_test passes.
-//  a way to fix is to move obfuscation into commander, save into Asking
-//    not-obfuscated message, but send to user obfuscated one.
-// Maybe this is already fixed, just not tested?
-func (r *Repetition) AnswerWholeWord(chatID int64, definition, word string) (string, error) {
-	panic("This logic is broken, fix it!")
-	row := r.db.QueryRow(`
-		SELECT word, stage
-		FROM Repetition
-		WHERE definition = $0
-		  AND chat_id = $1`,
-		definition, chatID)
-	var correct string
-	var stage int
-	if err := row.Scan(&correct, &stage); err != nil {
-		return "", fmt.Errorf("INTERNAL: Did not find definition %q: %w", definition, err)
-	}
-	if correct != word {
-		stage = 0
-	} else {
-		stage += 1
-		if stage >= len(r.stages) {
-			stage = len(r.stages) - 1
-		}
-	}
-	_, err := r.db.Exec(`
-		UPDATE Repetition
-		SET stage = $0, last_updated_seconds = $1
-		WHERE definition = $2
-		  AND chat_id = $3;`,
-		stage, time.Now().Unix(), definition, chatID)
-	if err != nil {
-		return "", fmt.Errorf("INTERNAL: Failed updating stage: %w", err)
-	}
-	return correct, nil
 }
 
 type AnswerEase int
