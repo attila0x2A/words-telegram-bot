@@ -89,6 +89,8 @@ const (
 	PracticeKnowAction
 	PracticeDontKnowAction
 	ResetProgressAction
+	PracticeAnswerAction
+	ShowAnswerAction
 )
 
 // Make sure all fields are Public, otherwise encoding will not work
@@ -97,9 +99,10 @@ const (
 // is not processed more than once?
 type CallbackInfo struct {
 	Action CallbackAction
-	// One of below is set depending on the action.
+	// Not every field below will be set for each action.
 	Word    string
 	Setting string
+	Ease    AnswerEase
 }
 
 // FIXME: Should return an error!

@@ -13,15 +13,81 @@
 // limitations under the License.
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// TODO: For anki structure:
-// Add button - show - show back of the card.
-//	* after show 4 buttons will appear (again, hard, good, easy)
-//	* all 4 buttons can be similar. Code should be very similar.
-//	* new card appears after again, hard, good, easy is chosen.
-// reset progress should probably be renamed to practise sooner.
-//	* equivalent to again.
+type ShowAnswerCallback struct{}
+
+func (ShowAnswerCallback) Call(s *State, q *CallbackQuery) error {
+	defer s.Telegram.AnswerCallbackLog(q.Id, "")
+	ci := CallbackInfoFromString(q.Data)
+	word := ci.Word
+
+	var ik []*InlineKeyboard
+	for _, ease := range []AnswerEase{AnswerAgain, AnswerHard, AnswerGood, AnswerEasy} {
+		ik = append(ik, answerIK(word, ease))
+	}
+	return flipWordCard(s.Clients, word, q.Message, ik)
+}
+
+func showAnswerIK(word string) *InlineKeyboard {
+	return &InlineKeyboard{
+		Text: "Show Answer",
+		CallbackData: CallbackInfo{
+			Action: ShowAnswerAction,
+			Word:   word,
+		}.String(),
+	}
+}
+
+type AnswerCallback struct{}
+
+func (AnswerCallback) Call(s *State, q *CallbackQuery) error {
+	defer s.Telegram.AnswerCallbackLog(q.Id, "")
+	chatID := q.Message.Chat.Id
+	ci := CallbackInfoFromString(q.Data)
+	word := ci.Word
+	ease := ci.Ease
+
+	// FIXME: Need to handle 2 rapid taps to avoid answering it 2 times in a row.
+	if err := s.Repetitions.Answer(chatID, word, ease); err != nil {
+		return err
+	}
+
+	// FIXME: This is a bit hacky. The only thing that we want to edit here is
+	// to remove all inline keyboard, but flipWordCard in addition queries DB
+	// for definition, which is unnecessary in this case.
+	if err := flipWordCard(s.Clients, word, q.Message, nil); err != nil {
+		return err
+	}
+
+	return practiceReply(s, chatID)
+}
+
+func answerIK(word string, ease AnswerEase) *InlineKeyboard {
+	var text string
+	switch ease {
+	case AnswerAgain:
+		text = "Again"
+	case AnswerHard:
+		text = "Hard"
+	case AnswerGood:
+		text = "Good"
+	case AnswerEasy:
+		text = "Easy"
+	default:
+		text = "UnknownEase"
+	}
+	return &InlineKeyboard{
+		Text: text,
+		CallbackData: CallbackInfo{
+			Action: PracticeAnswerAction,
+			Ease:   ease,
+			Word:   word,
+		}.String(),
+	}
+}
 
 type KnowCallback struct{}
 
@@ -39,16 +105,6 @@ func (KnowCallback) Call(s *State, q *CallbackQuery) error {
 		return err
 	}
 	return practiceReply(s, chatID)
-}
-
-func knowIK(word string) *InlineKeyboard {
-	return &InlineKeyboard{
-		Text: "Know",
-		CallbackData: CallbackInfo{
-			Action: PracticeKnowAction,
-			Word:   word,
-		}.String(),
-	}
 }
 
 type DontKnowCallback struct{}
@@ -71,16 +127,6 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 		return nil
 	}
 	return practiceReply(s, chatID)
-}
-
-func dontKnowIK(word string) *InlineKeyboard {
-	return &InlineKeyboard{
-		Text: "Don't know",
-		CallbackData: CallbackInfo{
-			Action: PracticeDontKnowAction,
-			Word:   word,
-		}.String(),
-	}
 }
 
 func resetProgressIK(word string) *InlineKeyboard {

@@ -66,15 +66,21 @@ fekete
 
 /practice
 
-b:Don't know
+b:Show Answer
+
+b:Again
 
 /settings
 
 /practice
 
-b:Don't know
+b:Show Answer
 
-b:Know
+b:Again
+
+b:Show Answer
+
+b:Good
 
 falu
 
@@ -82,7 +88,9 @@ b:Learn
 
 /practice
 
-b:Don't know
+b:Show Answer
+
+b:Again
 
 /stop
 

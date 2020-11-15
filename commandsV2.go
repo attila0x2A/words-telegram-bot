@@ -352,7 +352,7 @@ func practiceReply(s *State, chatID int64) error {
 	if err != nil {
 		return fmt.Errorf("retrieving word for repetition: %w", err)
 	}
-	return s.Telegram.SendMessage(NewMessageReply(chatID, word, knowIK(word), dontKnowIK(word)))
+	return s.Telegram.SendMessage(NewMessageReply(chatID, word, showAnswerIK(word)))
 }
 
 // settingsReply sends current settings and instructions on how to change them.
@@ -612,7 +612,8 @@ var SettingsCommands = map[string]CommandFactory{
 var CommandsTemplate = struct {
 	// When receiving a callback it will be matched here.
 	// Tests should test that each callback is reachable.
-	// Callbacks can rely only on info got from the CallbackQuery,
+	// Callbacks can rely only on info got from the CallbackQuery, and what is
+	// set in CommandsTemplate.
 	Callback map[CallbackAction]Callback
 	// Each key in the map should directly correspond to the name of the command.
 	// Possible improvement would be to allow regexps in the Commands name so
@@ -642,6 +643,8 @@ var CommandsTemplate = struct {
 		PracticeDontKnowAction: DontKnowCallback{},
 		ResetProgressAction:    DontKnowCallback{},
 		SaveWordAction:         LearnCallback{},
+		PracticeAnswerAction:   AnswerCallback{},
+		ShowAnswerAction:       ShowAnswerCallback{},
 	},
 	DefaultCommand: func(string) Command { return defaultCommand{} },
 }
