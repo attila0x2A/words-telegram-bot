@@ -21,12 +21,17 @@ type ShowAnswerCallback struct{}
 
 func (ShowAnswerCallback) Call(s *State, q *CallbackQuery) error {
 	defer s.Telegram.AnswerCallbackLog(q.Id, "")
+	chatID := q.Message.Chat.Id
 	ci := CallbackInfoFromString(q.Data)
 	word := ci.Word
 
 	var ik []*InlineKeyboard
 	for _, ease := range []AnswerEase{AnswerAgain, AnswerHard, AnswerGood, AnswerEasy} {
-		ik = append(ik, answerIK(word, ease))
+		sc, err := s.Repetitions.CalcSchedule(chatID, word, ease)
+		if err != nil {
+			return err
+		}
+		ik = append(ik, answerIK(word, ease, sc.ivl))
 	}
 	return flipWordCard(s.Clients, word, q.Message, ik)
 }
@@ -65,7 +70,7 @@ func (AnswerCallback) Call(s *State, q *CallbackQuery) error {
 	return practiceReply(s, chatID)
 }
 
-func answerIK(word string, ease AnswerEase) *InlineKeyboard {
+func answerIK(word string, ease AnswerEase, ivl int64) *InlineKeyboard {
 	var text string
 	switch ease {
 	case AnswerAgain:
@@ -78,6 +83,9 @@ func answerIK(word string, ease AnswerEase) *InlineKeyboard {
 		text = "Easy"
 	default:
 		text = "UnknownEase"
+	}
+	if ivl > 0 {
+		text = fmt.Sprintf("%s (%dd)", text, ivl)
 	}
 	return &InlineKeyboard{
 		Text: text,

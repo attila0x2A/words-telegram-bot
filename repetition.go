@@ -184,7 +184,14 @@ const (
 	AnswerEasy
 )
 
-func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
+type Schedule struct {
+	ivl                  int64
+	ease                 int64
+	last_updated_seconds int64
+	next_review_seconds  int64
+}
+
+func (r *Repetition) CalcSchedule(chatID int64, word string, answ AnswerEase) (*Schedule, error) {
 	// Following scheduling algorithm is based on the one used by Anki, but
 	// without differentiation between word that is being learned, relearned,
 	// or studied. It might be worth adding that as well in the future.
@@ -199,14 +206,13 @@ func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
 		word, chatID)
 	var ease, ivl, last_update int64
 	if err := row.Scan(&ease, &ivl, &last_update); err != nil {
-		return err
+		return nil, err
 	}
 	// Correct ivl for the actual time since previous review.
 	if d := int64(time.Now().Sub(time.Unix(last_update, 0)).Hours() / 24); d > ivl {
 		ivl = d
 	}
 
-	// TODO: New intervals should be displayed in the buttons.
 	mult := 1.0
 	switch answ {
 	case AnswerAgain:
@@ -249,8 +255,20 @@ func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
 		}
 		nr = t + ivl*int64(time.Hour.Seconds()*24)
 	}
+	return &Schedule{
+		ivl:                  ivl,
+		ease:                 ease,
+		last_updated_seconds: t,
+		next_review_seconds:  nr,
+	}, nil
+}
 
-	_, err := r.db.Exec(`
+func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
+	sc, err := r.CalcSchedule(chatID, word, answ)
+	if err != nil {
+		return err
+	}
+	if _, err = r.db.Exec(`
 		UPDATE Repetition
 		SET
 			ease = $0,
@@ -259,9 +277,9 @@ func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
 			next_review_seconds = $3
 		WHERE word = $5
 		  AND chat_id = $6;`,
-		ease, ivl, t, nr,
-		word, chatID)
-	if err != nil {
+		sc.ease, sc.ivl, sc.last_updated_seconds, sc.next_review_seconds,
+		word, chatID,
+	); err != nil {
 		return fmt.Errorf("INTERNAL: Failed updating learning intervals: %w", err)
 	}
 	return nil

@@ -305,7 +305,7 @@ func (fk *fakeTelegram) PressButton(button string) error {
 	lm := fk.messages[len(fk.messages)-1]
 	for _, ks := range lm.ReplyMarkup.InlineKeyboard {
 		for _, k := range ks {
-			if k.Text == button {
+			if strings.HasPrefix(k.Text, button) {
 				fk.updates = append(fk.updates, Update{
 					UpdateId: 0,
 					CallbackQuery: &CallbackQuery{
