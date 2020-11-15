@@ -148,8 +148,9 @@ cardfront
 	tm := &Telegram{hc: *fk.server.Client()}
 
 	c, err := NewCommander(tm, &CommanderOptions{
-		useCache: true,
-		dbPath:   dbPath,
+		useCache:   true,
+		dbPath:     dbPath,
+		againDelay: 0,
 		stages: []time.Duration{
 			0,
 			2 * time.Minute,

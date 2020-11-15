@@ -15,6 +15,14 @@ package main
 
 import "fmt"
 
+// TODO: For anki structure:
+// Add button - show - show back of the card.
+//	* after show 4 buttons will appear (again, hard, good, easy)
+//	* all 4 buttons can be similar. Code should be very similar.
+//	* new card appears after again, hard, good, easy is chosen.
+// reset progress should probably be renamed to practise sooner.
+//	* equivalent to again.
+
 type KnowCallback struct {
 	Word string
 }
@@ -25,7 +33,7 @@ func (KnowCallback) Call(s *State, q *CallbackQuery) error {
 	word := CallbackInfoFromString(q.Data).Word
 
 	// TODO: Need to handle 2 rapid taps to avoid saving it as known 2 times in a row.
-	if err := s.Repetitions.AnswerKnow(chatID, word); err != nil {
+	if err := s.Repetitions.Answer(chatID, word, AnswerGood); err != nil {
 		return err
 	}
 
@@ -62,7 +70,7 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 	chatID := q.Message.Chat.Id
 	word := info.Word
 
-	if err := s.Repetitions.AnswerDontKnow(chatID, word); err != nil {
+	if err := s.Repetitions.Answer(chatID, word, AnswerAgain); err != nil {
 		return err
 	}
 
@@ -70,7 +78,7 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 		return err
 	}
 
-	if info.Action == PracticeDontKnowActionNoPractice {
+	if info.Action == ResetProgressAction {
 		return nil
 	}
 	return practiceReply(s, chatID)
@@ -78,11 +86,11 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 
 func (DontKnowCallback) Match(_ *State, q *CallbackQuery) bool {
 	info := CallbackInfoFromString(q.Data)
-	return info.Action == PracticeDontKnowAction || info.Action == PracticeDontKnowActionNoPractice
+	return info.Action == PracticeDontKnowAction || info.Action == ResetProgressAction
 }
 
 func (c DontKnowCallback) AsInlineKeyboard() *InlineKeyboard {
-	a := PracticeDontKnowActionNoPractice
+	a := ResetProgressAction
 	if c.Practice {
 		a = PracticeDontKnowAction
 	}
@@ -113,7 +121,7 @@ func (c ResetProgressCallback) AsInlineKeyboard() *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Reset progress",
 		CallbackData: CallbackInfo{
-			Action: PracticeDontKnowActionNoPractice,
+			Action: ResetProgressAction,
 			Word:   c.Word,
 		}.String(),
 	}

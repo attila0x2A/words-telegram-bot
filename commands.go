@@ -88,7 +88,7 @@ const (
 	SaveWordAction CallbackAction = iota
 	PracticeKnowAction
 	PracticeDontKnowAction
-	PracticeDontKnowActionNoPractice
+	ResetProgressAction
 )
 
 // Make sure all fields are Public, otherwise encoding will not work
@@ -125,14 +125,15 @@ type Commander struct {
 }
 
 type CommanderOptions struct {
-	useCache bool
-	dbPath   string
-	port     int
-	certPath string
-	keyPath  string
-	ip       string
-	push     bool
-	stages   []time.Duration
+	useCache   bool
+	againDelay time.Duration
+	dbPath     string
+	port       int
+	certPath   string
+	keyPath    string
+	ip         string
+	push       bool
+	stages     []time.Duration
 }
 
 func escapeMarkdown(s string) string {
@@ -190,6 +191,7 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	if err != nil {
 		return nil, err
 	}
+	r.againDelay = opts.againDelay
 	c := &Clients{
 		Telegram:    tm,
 		Definer:     d,

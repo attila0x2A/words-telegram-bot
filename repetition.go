@@ -17,12 +17,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math"
 	"strings"
 	"time"
 )
 
 type Repetition struct {
-	db *sql.DB
+	db          *sql.DB
+	initialEase int
+	initialIvl  int64
+	againDelay  time.Duration
 	// FIXME: Probably not needed here. Maybe only the number of stages.
 	stages []time.Duration
 }
@@ -52,7 +56,7 @@ func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
 			chat_id INTEGER,
 			word STRING,
 			definition STRING,
-			stage INTEGER,
+			stage INTEGER, -- obsolete
 			last_updated_seconds INTEGER -- seconds since UNIX epoch
 		);
 		CREATE TEMP TABLE IF NOT EXISTS Stages (
@@ -67,6 +71,41 @@ func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
 	); err != nil {
 		return nil, err
 	}
+	if _, err := db.Exec(strings.Join([]string{
+		// next_review_seconds -- seconds since UNIX epoch for the next review.
+		`ALTER TABLE Repetition ADD COLUMN next_review_seconds INTEGER`,
+		// current ease and interval for the card.
+		`ALTER TABLE Repetition ADD COLUMN ease INTEGER`,
+		`ALTER TABLE Repetition ADD COLUMN ivl INTEGER`,
+	}, ";")); err != nil {
+		// There is no way to add column if it doesn't exists only, so we have
+		// to ignore an error here. Matching on the error text is not a good
+		// style, however there is no type that can be matched.
+		if !strings.Contains(err.Error(), "duplicate column name") {
+			return nil, err
+		}
+	}
+	// Set next_review_seconds, otherwise all cards not using next_review_seconds are lost!
+	const (
+		initialEase = 250
+		initialIvl  = 0
+	)
+	if _, err := db.Exec(
+		`UPDATE Repetition
+		SET
+			next_review_seconds = last_updated_seconds + (
+				SELECT Stages.duration
+				FROM Stages
+				WHERE Stages.id = Repetition.stage),
+			ease = $1,
+			ivl = $2
+		WHERE
+			next_review_seconds IS NULL;`,
+		initialEase,
+		initialIvl,
+	); err != nil {
+		return nil, err
+	}
 	row := db.QueryRow(`
 		SELECT COUNT(*)
 		FROM Repetition;`)
@@ -75,15 +114,27 @@ func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
 		return nil, err
 	}
 	log.Printf("DEBUG: Repetition database initially contains %d rows!", d)
-	return &Repetition{db, stages}, nil
+	return &Repetition{
+		db: db,
+		// TODO: Eventually these should be configurable by the user.
+		initialEase: initialEase,
+		initialIvl:  initialIvl,
+		againDelay:  20 * time.Second,
+	}, nil
 }
 
 func (r *Repetition) Save(chatID int64, word, definition string) error {
-	// FIXME: Don't insert duplicates!!!
+	// FIXME: Don't insert duplicates!
+	t := time.Now().Unix()
 	_, err := r.db.Exec(`
-		INSERT INTO Repetition(chat_id, word, definition, stage, last_updated_seconds)
-		VALUES($0, $1, $2, $3, $4)`,
-		chatID, word, definition, 0, time.Now().Unix())
+		INSERT INTO Repetition(chat_id,
+			word, definition, stage,
+			ease, ivl,
+			last_updated_seconds, next_review_seconds)
+		VALUES($0, $1, $2, $3, $4, $5, $6, $7)`,
+		chatID, word, definition, 0,
+		r.initialEase, r.initialIvl,
+		t, t+r.initialIvl*int64(time.Hour.Seconds()))
 	return err
 }
 
@@ -96,8 +147,7 @@ func (r *Repetition) Repeat(chatID int64) (string, error) {
 	row := r.db.QueryRow(`
 		SELECT word, definition
 		FROM Repetition
-		INNER JOIN Stages ON Repetition.stage <= Stages.id
-		WHERE Repetition.last_updated_seconds + Stages.duration <= $0
+		WHERE Repetition.next_review_seconds <= $0
 		  AND Repetition.chat_id = $1;`,
 		time.Now().Unix(), chatID)
 	var w, d string
@@ -119,8 +169,7 @@ func (r *Repetition) RepeatWord(chatID int64) (string, error) {
 	row := r.db.QueryRow(`
 		SELECT word
 		FROM Repetition
-		INNER JOIN Stages ON Repetition.stage <= Stages.id
-		WHERE Repetition.last_updated_seconds + Stages.duration <= $0
+		WHERE Repetition.next_review_seconds <= $0
 		  AND Repetition.chat_id = $1;`,
 		time.Now().Unix(), chatID)
 	var w string
@@ -136,7 +185,7 @@ func (r *Repetition) RepeatWord(chatID int64) (string, error) {
 //  a way to fix is to move obfuscation into commander, save into Asking
 //    not-obfuscated message, but send to user obfuscated one.
 // Maybe this is already fixed, just not tested?
-func (r *Repetition) Answer(chatID int64, definition, word string) (string, error) {
+func (r *Repetition) AnswerWholeWord(chatID int64, definition, word string) (string, error) {
 	panic("This logic is broken, fix it!")
 	row := r.db.QueryRow(`
 		SELECT word, stage
@@ -169,28 +218,94 @@ func (r *Repetition) Answer(chatID int64, definition, word string) (string, erro
 	return correct, nil
 }
 
-func (r *Repetition) AnswerKnow(chatID int64, word string) error {
-	_, err := r.db.Exec(`
-		UPDATE Repetition
-		SET stage = MIN(stage + 1, $0), last_updated_seconds = $1
-		WHERE word = $2
-		  AND chat_id = $3;`,
-		len(r.stages)-1, time.Now().Unix(), word, chatID)
-	if err != nil {
-		return fmt.Errorf("INTERNAL: Failed updating stage: %w", err)
-	}
-	return nil
-}
+type AnswerEase int
 
-func (r *Repetition) AnswerDontKnow(chatID int64, word string) error {
+const (
+	AnswerAgain AnswerEase = iota
+	AnswerHard
+	AnswerGood
+	AnswerEasy
+)
+
+func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
+	// Following scheduling algorithm is based on the one used by Anki, but
+	// without differentiation between word that is being learned, relearned,
+	// or studied. It might be worth adding that as well in the future.
+	// TODO: Make configurable.
+	const easyBonus = 1.3
+
+	row := r.db.QueryRow(`
+		SELECT ease, ivl, last_updated_seconds
+		FROM Repetition
+		WHERE Repetition.word = $0
+		  AND Repetition.chat_id = $1;`,
+		word, chatID)
+	var ease, ivl, last_update int64
+	if err := row.Scan(&ease, &ivl, &last_update); err != nil {
+		return err
+	}
+	// Correct ivl for the actual time since previous review.
+	if d := int64(time.Now().Sub(time.Unix(last_update, 0)).Hours() / 24); d > ivl {
+		ivl = d
+	}
+
+	// TODO: New intervals should be displayed in the buttons.
+	mult := 1.0
+	switch answ {
+	case AnswerAgain:
+		ease -= 20
+	case AnswerHard:
+		ease -= 15
+		mult = 1.2
+	case AnswerGood:
+		mult = float64(ease) / 100.0
+	case AnswerEasy:
+		ease += 15
+		mult = float64(ease) * easyBonus / 100.0
+	}
+	mult = math.Min(mult, 13)
+	if ease < 130 {
+		ease = 130
+	} else if ease > 1300 {
+		ease = 1300
+	}
+	t := time.Now().Unix()
+	var nr int64
+	if answ == AnswerAgain {
+		ivl = 0
+		nr = t + int64(r.againDelay.Seconds())
+	} else {
+		switch ivl {
+		// The previous answer was Again, so we reset interval to 1 day.
+		case 0:
+			ivl = 1
+		case 1:
+			ivl = 3
+		default:
+			nivl := int64(float64(ivl) * mult)
+			// Always increase interval at least by 1.
+			if nivl == ivl {
+				ivl += 1
+			} else {
+				ivl = nivl
+			}
+		}
+		nr = t + ivl*int64(time.Hour.Seconds()*24)
+	}
+
 	_, err := r.db.Exec(`
 		UPDATE Repetition
-		SET stage = 0, last_updated_seconds = $0
-		WHERE word = $1
-		  AND chat_id = $2;`,
-		time.Now().Unix(), word, chatID)
+		SET
+			ease = $0,
+			ivl = $1,
+			last_updated_seconds = $2,
+			next_review_seconds = $3
+		WHERE word = $5
+		  AND chat_id = $6;`,
+		ease, ivl, t, nr,
+		word, chatID)
 	if err != nil {
-		return fmt.Errorf("INTERNAL: Failed updating stage: %w", err)
+		return fmt.Errorf("INTERNAL: Failed updating learning intervals: %w", err)
 	}
 	return nil
 }

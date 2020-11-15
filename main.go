@@ -54,13 +54,14 @@ func main() {
 	log.Printf("db_path: %q", *db)
 	ctx := context.Background()
 	opts := &CommanderOptions{
-		useCache: false,
-		dbPath:   *db,
-		port:     *port,
-		certPath: *cert,
-		keyPath:  *key,
-		ip:       *ip,
-		push:     *push,
+		useCache:   false,
+		dbPath:     *db,
+		port:       *port,
+		certPath:   *cert,
+		keyPath:    *key,
+		ip:         *ip,
+		push:       *push,
+		againDelay: 20 * time.Second,
 		stages: []time.Duration{
 			20 * time.Second,
 			1 * time.Hour * 23,
