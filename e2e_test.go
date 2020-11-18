@@ -132,6 +132,14 @@ cardback (definitions or what not)
 
 cardfront
 
+/add
+
+card 2
+
+card 2 def
+
+card 2
+
 /practice
 `, "\n"), "\n\n")
 

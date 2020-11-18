@@ -217,9 +217,16 @@ type multiQuestionCommand struct {
 
 func MultiQuestionCommandFactory(questions []*question, save func(state *State, chatID int64, questions []*question) error) CommandFactory {
 	return func(name string) Command {
+		// We need to copy questions to avoid reusing the same questions for
+		// multiple instances.
+		cq := make([]*question, len(questions))
+		for i, q := range questions {
+			cq[i] = new(question)
+			*cq[i] = *q
+		}
 		return &multiQuestionCommand{
 			name:      name,
-			questions: questions,
+			questions: cq,
 			save:      save,
 		}
 	}
@@ -508,10 +515,6 @@ func (defaultCommand) Init(*SerializedCommand) error {
 func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	chatID := m.Chat.Id
 
-	if len(strings.Split(m.Text, " ")) > 1 {
-		return nil, UserError{ChatID: chatID, Err: fmt.Errorf("For now this bot doesn't work with expressions. Try entering a single work without spaces.")}
-	}
-
 	def, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
 	if err == nil {
 		return nil, s.Telegram.SendMessage(NewMessageReply(
@@ -520,6 +523,11 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	if err != sql.ErrNoRows {
 		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)
 	}
+
+	if len(strings.Split(m.Text, " ")) > 1 {
+		return nil, UserError{ChatID: chatID, Err: fmt.Errorf("For now this bot doesn't work with expressions. Try entering a single work without spaces.")}
+	}
+
 	settings, err := s.Settings.Get(chatID)
 	if err != nil {
 		return nil, fmt.Errorf("get settings: %v", err)

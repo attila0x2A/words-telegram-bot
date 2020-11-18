@@ -252,6 +252,28 @@
     ]
   },
   {
+    "Send": "/add",
+    "Want": "Enter front of the card (word, expression, question).",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2",
+    "Want": "Enter back of the card (definition, answer).",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2 def",
+    "Want": "Added \"card 2\" for learning!",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2",
+    "Want": "card 2 def",
+    "WantButtons": [
+      "Reset progress"
+    ]
+  },
+  {
     "Send": "/practice",
     "Want": "cardfront",
     "WantButtons": [
