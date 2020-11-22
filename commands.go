@@ -94,15 +94,15 @@ const (
 )
 
 // Make sure all fields are Public, otherwise encoding will not work
+// NOTE: Maximum size of this struct when json-encoded in 64 bytes.
 // TODO: Should include ID to make sure the same action is not performed many
 // times? In general should keep track of different IDs to make sure that stuff
 // is not processed more than once?
 type CallbackInfo struct {
 	Action CallbackAction
 	// Not every field below will be set for each action.
-	Word    string
-	Setting string
-	Ease    AnswerEase
+	WordID int64
+	Ease   AnswerEase
 }
 
 // FIXME: Should return an error!
@@ -128,15 +128,16 @@ type Commander struct {
 }
 
 type CommanderOptions struct {
-	useCache   bool
-	againDelay time.Duration
-	dbPath     string
-	port       int
-	certPath   string
-	keyPath    string
-	ip         string
-	push       bool
-	stages     []time.Duration
+	useCache       bool
+	againDelay     time.Duration
+	dbPath         string
+	port           int
+	certPath       string
+	keyPath        string
+	ip             string
+	push           bool
+	stages         []time.Duration
+	wordsCacheSize int
 }
 
 func escapeMarkdown(s string) string {
@@ -212,7 +213,7 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	return &Commander{
 		Clients: c,
 		bot: &Bot{
-			state:   &State{c},
+			state:   &State{c, NewWordsCache(opts.wordsCacheSize)},
 			command: make(map[int64]Command),
 		},
 	}, nil

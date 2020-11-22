@@ -17,6 +17,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -52,6 +53,8 @@ func main() {
 
 	flag.Parse()
 	log.Printf("db_path: %q", *db)
+
+	rand.Seed(time.Now().UnixNano())
 	ctx := context.Background()
 	opts := &CommanderOptions{
 		useCache:   false,
@@ -78,6 +81,7 @@ func main() {
 			233 * time.Hour * 24,
 			377 * time.Hour * 24,
 		},
+		wordsCacheSize: 100,
 	}
 	if err := Start(ctx, opts); err != nil {
 		log.Fatal(err)

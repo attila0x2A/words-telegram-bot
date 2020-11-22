@@ -34,6 +34,7 @@ type Callback interface {
 
 type State struct {
 	*Clients
+	Cache *WordsCache
 }
 
 // TODO:
@@ -179,8 +180,8 @@ type CommandFactory func(name string) Command
 
 // UserError is an error that should be surfaced to the user.
 type UserError struct {
-	Err    error
 	ChatID int64
+	Err    error
 }
 
 func (u UserError) Error() string {
@@ -359,7 +360,8 @@ func practiceReply(s *State, chatID int64) error {
 	if err != nil {
 		return fmt.Errorf("retrieving word for repetition: %w", err)
 	}
-	return s.Telegram.SendMessage(NewMessageReply(chatID, word, showAnswerIK(word)))
+	id := s.Cache.Add(chatID, word)
+	return s.Telegram.SendMessage(NewMessageReply(chatID, word, showAnswerIK(id)))
 }
 
 // settingsReply sends current settings and instructions on how to change them.
@@ -514,11 +516,12 @@ func (defaultCommand) Init(*SerializedCommand) error {
 }
 func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	chatID := m.Chat.Id
+	wordID := s.Cache.Add(chatID, m.Text)
 
 	def, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
 	if err == nil {
 		return nil, s.Telegram.SendMessage(NewMessageReply(
-			m.Chat.Id, def, resetProgressIK(m.Text)))
+			m.Chat.Id, def, resetProgressIK(wordID)))
 	}
 	if err != sql.ErrNoRows {
 		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)
@@ -549,7 +552,7 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 			ParseMode: "MarkdownV2",
 			ReplyMarkup: &ReplyMarkup{
 				InlineKeyboard: [][]*InlineKeyboard{[]*InlineKeyboard{
-					learnIK(m.Text),
+					learnIK(wordID),
 				}},
 			},
 		}); err != nil {
