@@ -279,5 +279,10 @@
     "WantButtons": [
       "Show Answer"
     ]
+  },
+  {
+    "Send": "/stats",
+    "Want": "Number of words saved for learning: 3",
+    "WantButtons": null
   }
 ]

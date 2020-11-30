@@ -396,6 +396,16 @@ To modify settings use one of the commands below:
 	return state.Telegram.SendMessage(NewMessageReply(chatID, msg))
 }
 
+// statsReply sends current stats to the user.
+func statsReply(state *State, chatID int64) error {
+	s, err := state.Repetitions.Stats(chatID)
+	if err != nil {
+		return err
+	}
+	msg := fmt.Sprintf("Number of words saved for learning: %d", s.WordCount)
+	return state.Telegram.SendMessage(NewMessageReply(chatID, msg))
+}
+
 // This inteface is a bit redundant. We need it though to avoid initialization
 // loop with SettingsCommands depending on settingsReply and settingsReply
 // depending on SettingsCommands.
@@ -644,6 +654,7 @@ var CommandsTemplate = struct {
 			"/stop":     textReply("Stopped. Input the word to get it's definition."),
 			"/practice": ReplyCommand(practiceReply),
 			"/settings": ReplyCommand(settingsReply),
+			"/stats":    ReplyCommand(statsReply),
 			"/add":      AddCommandFactory(),
 			"/delete":   DeleteCommandFactory(),
 		},

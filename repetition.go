@@ -121,6 +121,23 @@ func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
 	}, nil
 }
 
+type RepetitionStats struct {
+	// Number of words user has saved for learning.
+	WordCount int
+}
+
+func (r *Repetition) Stats(chatID int64) (*RepetitionStats, error) {
+	row := r.db.QueryRow(`
+			SELECT COUNT(*) FROM Repetition
+			WHERE chat_id = $1`,
+		chatID)
+	stats := new(RepetitionStats)
+	if err := row.Scan(&stats.WordCount); err != nil {
+		return nil, fmt.Errorf("counting rows for chat %d: %w", chatID, err)
+	}
+	return stats, nil
+}
+
 func (r *Repetition) Save(chatID int64, word, definition string) error {
 	// FIXME: Don't insert duplicates!
 	t := time.Now().Unix()

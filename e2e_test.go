@@ -141,6 +141,8 @@ card 2 def
 card 2
 
 /practice
+
+/stats
 `, "\n"), "\n\n")
 
 	dir, err := ioutil.TempDir("", "e2e")
