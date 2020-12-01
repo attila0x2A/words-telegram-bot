@@ -17,8 +17,6 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,33 +25,10 @@ import (
 
 type Definer struct {
 	usage *UsageFetcher
-	cache DefCacheInterface
 	http  *http.Client
 }
 
 func (d *Definer) Define(word string, settings *Settings) (ds []string, err error) {
-	// TODO: Not very elegant, is there a better way?
-	const separator = "lsjelrzprhkvzvxzquhurhcakugvuhtqkrklggdpdseus----="
-	_, def, err := d.cache.Lookup(word)
-	if err == nil {
-		return strings.Split(def, separator), nil
-	}
-	if errors.Is(err, sql.ErrNoRows) {
-		defer func() {
-			// TODO: Make a use of corrected word once more structured
-			// information is returned.
-			if len(ds) == 0 || err != nil {
-				return
-			}
-			if err := d.cache.Save(word, word, strings.Join(ds, separator)); err != nil {
-				log.Printf("cache.Save(%q): %w", word, err)
-			}
-		}()
-	} else {
-		// At this point err != nil
-		log.Printf("ERROR: cache.Lookup(%q): %w", word, err)
-	}
-
 	p := WikiParser{
 		InputLanguage: settings.InputLanguage,
 	}

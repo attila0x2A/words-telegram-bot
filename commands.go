@@ -128,7 +128,6 @@ type Commander struct {
 }
 
 type CommanderOptions struct {
-	useCache       bool
 	againDelay     time.Duration
 	dbPath         string
 	port           int
@@ -166,16 +165,6 @@ func escapeMarkdown(s string) string {
 
 func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	hc := &http.Client{}
-	var cache DefCacheInterface
-	if opts.useCache {
-		var err error
-		cache, err = NewDefCache(opts.dbPath)
-		if err != nil {
-			return nil, fmt.Errorf("new cache(%q): %w", opts.dbPath, err)
-		}
-	} else {
-		cache = &NoCache{}
-	}
 	// TODO: Can use errgroup if there is a need to paralelize. This is the
 	// slowest step in initialization.
 	uf, err := NewUsageFetcher(opts.dbPath)
@@ -188,7 +177,6 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	}
 	d := &Definer{
 		usage: uf,
-		cache: cache,
 		http:  hc,
 	}
 	r, err := NewRepetition(opts.dbPath, opts.stages)

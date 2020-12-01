@@ -57,7 +57,6 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	ctx := context.Background()
 	opts := &CommanderOptions{
-		useCache:   false,
 		dbPath:     *db,
 		port:       *port,
 		certPath:   *cert,
