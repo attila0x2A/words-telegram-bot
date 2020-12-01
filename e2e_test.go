@@ -193,10 +193,18 @@ card 2
 		}
 		lm := fk.messages[len(fk.messages)-1]
 		var bs []string
-		for _, ks := range lm.ReplyMarkup.InlineKeyboard {
-			for _, k := range ks {
-				bs = append(bs, k.Text)
+		switch rm := lm.ReplyMarkup.(type) {
+		case nil:
+		// FIXME: This is extremely annoying. I am not yet sure what is the best solution. Maybe json.RawMessage should be used?
+		case map[string]interface{}:
+			for _, ks := range rm["inline_keyboard"].([]interface{}) {
+				for _, k := range ks.([]interface{}) {
+					m := k.(map[string]interface{})
+					bs = append(bs, m["text"].(string))
+				}
 			}
+		default:
+			t.Fatalf("Unsupported type for ReplyMarkup %v. Please extent e2e_test.", rm)
 		}
 		got = append(got, Test{
 			Send:        msg,
@@ -313,15 +321,16 @@ func (fk *fakeTelegram) SendMessage(s string) {
 
 func (fk *fakeTelegram) PressButton(button string) error {
 	lm := fk.messages[len(fk.messages)-1]
-	for _, ks := range lm.ReplyMarkup.InlineKeyboard {
-		for _, k := range ks {
-			if strings.HasPrefix(k.Text, button) {
+	for _, ks := range lm.ReplyMarkup.(map[string]interface{})["inline_keyboard"].([]interface{}) {
+		for _, k := range ks.([]interface{}) {
+			m := k.(map[string]interface{})
+			if strings.HasPrefix(m["text"].(string), button) {
 				fk.updates = append(fk.updates, Update{
 					UpdateId: 0,
 					CallbackQuery: &CallbackQuery{
 						Id:      "0",
 						Message: lm,
-						Data:    k.CallbackData,
+						Data:    m["callback_data"].(string),
 					},
 				})
 				return nil

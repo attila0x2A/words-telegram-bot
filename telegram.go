@@ -48,7 +48,7 @@ type Message struct {
 	Chat struct {
 		Id int64 `json:"id"`
 	} `json:"chat"`
-	ReplyMarkup ReplyMarkup `json:"reply_markup"`
+	ReplyMarkup interface{} `json:"reply_markup"`
 }
 
 type CallbackQuery struct {
@@ -78,15 +78,15 @@ type InlineKeyboard struct {
 	CallbackData string `json:"callback_data"`
 }
 
-type ReplyMarkup struct {
+type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]*InlineKeyboard `json:"inline_keyboard"`
 }
 
 type MessageReply struct {
-	ChatId      int64        `json:"chat_id"`
-	Text        string       `json:"text"`
-	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
-	ParseMode   string       `json:"parse_mode,omitempty"`
+	ChatId      int64       `json:"chat_id"`
+	Text        string      `json:"text"`
+	ReplyMarkup interface{} `json:"reply_markup,omitempty"`
+	ParseMode   string      `json:"parse_mode,omitempty"`
 }
 
 type EditMessageText struct {
@@ -94,7 +94,7 @@ type EditMessageText struct {
 	MessageId   int64       `json:"message_id"`
 	ParseMode   string      `json:"parse_mode,omitempty"`
 	Text        string      `json:"text,omitempty"`
-	ReplyMarkup ReplyMarkup `json:"reply_markup,omitempty"`
+	ReplyMarkup interface{} `json:"reply_markup,omitempty"`
 }
 
 type Telegram struct {

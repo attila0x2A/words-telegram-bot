@@ -47,7 +47,7 @@ func flipWordCard(c *Clients, word string, m *Message, ks []*InlineKeyboard) err
 		//ParseMode:   "MarkdownV2",
 		Text: def,
 		// FIXME: Should InlineKeyboard be refactored for less duplication?
-		ReplyMarkup: ReplyMarkup{
+		ReplyMarkup: &InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{ks},
 		},
 	}

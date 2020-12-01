@@ -332,9 +332,9 @@ func ReplyCommand(reply func(s *State, chatID int64) error) CommandFactory {
 }
 
 func NewMessageReply(chatID int64, text string, ik ...*InlineKeyboard) *MessageReply {
-	var rm *ReplyMarkup
+	var rm *InlineKeyboardMarkup
 	if len(ik) > 0 {
-		rm = &ReplyMarkup{
+		rm = &InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{ik},
 		}
 	}
@@ -393,7 +393,10 @@ Time Zone: %s
 To modify settings use one of the commands below:
 %s
 `, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone, strings.Join(cmds, "\n"))
-	return state.Telegram.SendMessage(NewMessageReply(chatID, msg))
+	return state.Telegram.SendMessage(&MessageReply{
+		ChatId: chatID,
+		Text:   msg,
+	})
 }
 
 // statsReply sends current stats to the user.
@@ -560,7 +563,7 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 			ChatId:    m.Chat.Id,
 			Text:      d,
 			ParseMode: "MarkdownV2",
-			ReplyMarkup: &ReplyMarkup{
+			ReplyMarkup: &InlineKeyboardMarkup{
 				InlineKeyboard: [][]*InlineKeyboard{[]*InlineKeyboard{
 					learnIK(wordID),
 				}},

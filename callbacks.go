@@ -181,7 +181,7 @@ func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 	r := &EditMessageText{
 		ChatId:    m.Chat.Id,
 		MessageId: m.Id,
-		ReplyMarkup: ReplyMarkup{
+		ReplyMarkup: InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{
 				[]*InlineKeyboard{},
 			},
