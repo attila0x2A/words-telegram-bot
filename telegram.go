@@ -82,6 +82,18 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]*InlineKeyboard `json:"inline_keyboard"`
 }
 
+// https://core.telegram.org/bots/api#keyboardbutton
+type ReplyKeyboardButton struct {
+	Text            string `json:"text"`
+	RequestLocation bool   `json:"request_location,omitempty"`
+}
+
+type ReplyKeyboardMarkup struct {
+	Keyboard [][]*ReplyKeyboardButton `json:"keyboard"`
+	Resize   bool                     `json:"resize_keyboard,omitempty"`
+	OneTime  bool                     `json:"one_time_keyboard,omitempty"`
+}
+
 type MessageReply struct {
 	ChatId      int64       `json:"chat_id"`
 	Text        string      `json:"text"`

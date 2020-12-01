@@ -197,10 +197,21 @@ card 2
 		case nil:
 		// FIXME: This is extremely annoying. I am not yet sure what is the best solution. Maybe json.RawMessage should be used?
 		case map[string]interface{}:
-			for _, ks := range rm["inline_keyboard"].([]interface{}) {
-				for _, k := range ks.([]interface{}) {
-					m := k.(map[string]interface{})
-					bs = append(bs, m["text"].(string))
+			// Is it InlineKeyboardMarkup?
+			if ik, ok := rm["inline_keyboard"]; ok {
+				for _, ks := range ik.([]interface{}) {
+					for _, k := range ks.([]interface{}) {
+						m := k.(map[string]interface{})
+						bs = append(bs, m["text"].(string))
+					}
+				}
+				// Is it ReplyKeyboardMarkup?
+			} else if rk, ok := rm["keyboard"]; ok {
+				for _, ks := range rk.([]interface{}) {
+					for _, k := range ks.([]interface{}) {
+						m := k.(map[string]interface{})
+						bs = append(bs, m["text"].(string))
+					}
 				}
 			}
 		default:
