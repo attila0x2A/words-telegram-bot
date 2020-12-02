@@ -43,9 +43,10 @@ func methodURL(m string) string {
 // possible to change reply_markup in editMessageText (apart from inlined
 // keyboard).
 type Message struct {
-	Id   int64  `json:"message_id"`
-	Text string `json:"text"`
-	Chat struct {
+	Id       int64           `json:"message_id"`
+	Text     string          `json:"text"`
+	Entities json.RawMessage `json:"entities,omitempty"`
+	Chat     struct {
 		Id int64 `json:"id"`
 	} `json:"chat"`
 	ReplyMarkup interface{} `json:"reply_markup"`
@@ -95,18 +96,20 @@ type ReplyKeyboardMarkup struct {
 }
 
 type MessageReply struct {
-	ChatId      int64       `json:"chat_id"`
-	Text        string      `json:"text"`
-	ReplyMarkup interface{} `json:"reply_markup,omitempty"`
-	ParseMode   string      `json:"parse_mode,omitempty"`
+	ChatId      int64           `json:"chat_id"`
+	Text        string          `json:"text"`
+	Entities    json.RawMessage `json:"entities,omitempty"`
+	ReplyMarkup interface{}     `json:"reply_markup,omitempty"`
+	ParseMode   string          `json:"parse_mode,omitempty"`
 }
 
 type EditMessageText struct {
-	ChatId      int64       `json:"chat_id"`
-	MessageId   int64       `json:"message_id"`
-	ParseMode   string      `json:"parse_mode,omitempty"`
-	Text        string      `json:"text,omitempty"`
-	ReplyMarkup interface{} `json:"reply_markup,omitempty"`
+	ChatId      int64           `json:"chat_id"`
+	MessageId   int64           `json:"message_id"`
+	ParseMode   string          `json:"parse_mode,omitempty"`
+	Text        string          `json:"text,omitempty"`
+	Entities    json.RawMessage `json:"entities,omitempty"`
+	ReplyMarkup interface{}     `json:"reply_markup,omitempty"`
 }
 
 type Telegram struct {

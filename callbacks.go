@@ -174,10 +174,7 @@ func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
 		return nil
 	}
-	// FIXME: This loses all the formatting information. An approach similar to
-	// the in-memory word cache can probably be used to preserve it, if
-	// formatting not present in the Message.
-	if err := s.Repetitions.Save(chatID, word, q.Message.Text); err != nil {
+	if err := s.Repetitions.Save(chatID, word, q.Message.Text, string(q.Message.Entities)); err != nil {
 		return err
 	}
 	m := q.Message

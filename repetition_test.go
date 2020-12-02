@@ -102,7 +102,7 @@ func TestRepetition(t *testing.T) {
 	}
 
 	const chatId int64 = 1
-	if err := r.Save(chatId, "foo", "foo is bar"); err != nil {
+	if err := r.Save(chatId, "foo", "foo is bar", ""); err != nil {
 		t.Fatal(err)
 	}
 	check(&row{chatId: chatId, word: "foo", definition: "foo is bar", ease: 250, ivl: 0})

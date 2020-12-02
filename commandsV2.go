@@ -331,7 +331,7 @@ func ReplyCommand(reply func(s *State, chatID int64) error) CommandFactory {
 	)
 }
 
-func NewMessageReply(chatID int64, text string, ik ...*InlineKeyboard) *MessageReply {
+func NewMessageReply(chatID int64, text, entities string, ik ...*InlineKeyboard) *MessageReply {
 	var rm *InlineKeyboardMarkup
 	if len(ik) > 0 {
 		rm = &InlineKeyboardMarkup{
@@ -341,6 +341,7 @@ func NewMessageReply(chatID int64, text string, ik ...*InlineKeyboard) *MessageR
 	return &MessageReply{
 		ChatId:      chatID,
 		Text:        text,
+		Entities:    json.RawMessage(entities),
 		ReplyMarkup: rm,
 	}
 }
@@ -361,7 +362,7 @@ func practiceReply(s *State, chatID int64) error {
 		return fmt.Errorf("retrieving word for repetition: %w", err)
 	}
 	id := s.Cache.Add(chatID, word)
-	return s.Telegram.SendMessage(NewMessageReply(chatID, word, showAnswerIK(id)))
+	return s.Telegram.SendMessage(NewMessageReply(chatID, word, "", showAnswerIK(id)))
 }
 
 // settingsReply sends current settings and instructions on how to change them.
@@ -406,7 +407,7 @@ func statsReply(state *State, chatID int64) error {
 		return err
 	}
 	msg := fmt.Sprintf("Number of words saved for learning: %d", s.WordCount)
-	return state.Telegram.SendMessage(NewMessageReply(chatID, msg))
+	return state.Telegram.SendMessage(NewMessageReply(chatID, msg, ""))
 }
 
 // This inteface is a bit redundant. We need it though to avoid initialization
@@ -486,7 +487,8 @@ func AddCommandFactory() CommandFactory {
 					return fmt.Errorf("unexpected question in save: %v", q)
 				}
 			}
-			if err := s.Repetitions.Save(chatID, front, back); err != nil {
+			// FIXME: Preserve entities, so user's formatting will be saved.
+			if err := s.Repetitions.Save(chatID, front, back, ""); err != nil {
 				return err
 			}
 			return s.Telegram.SendTextMessage(chatID, fmt.Sprintf("Added %q for learning!", front))
@@ -531,10 +533,10 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	chatID := m.Chat.Id
 	wordID := s.Cache.Add(chatID, m.Text)
 
-	def, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
+	def, entities, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
 	if err == nil {
 		return nil, s.Telegram.SendMessage(NewMessageReply(
-			m.Chat.Id, def, resetProgressIK(wordID)))
+			m.Chat.Id, def, entities, resetProgressIK(wordID)))
 	}
 	if err != sql.ErrNoRows {
 		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)

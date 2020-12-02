@@ -83,6 +83,17 @@ func NewRepetition(dbPath string, stages []time.Duration) (*Repetition, error) {
 			return nil, err
 		}
 	}
+	if _, err := db.Exec(strings.Join([]string{
+		// markup of the definition json encoded.
+		`ALTER TABLE Repetition ADD COLUMN definition_entities STRING`,
+	}, ";")); err != nil {
+		// There is no way to add column if it doesn't exists only, so we have
+		// to ignore an error here. Matching on the error text is not a good
+		// style, however there is no type that can be matched.
+		if !strings.Contains(err.Error(), "duplicate column name") {
+			return nil, err
+		}
+	}
 	// Set next_review_seconds, otherwise all cards not using next_review_seconds are lost!
 	const (
 		initialEase = 250
@@ -138,16 +149,16 @@ func (r *Repetition) Stats(chatID int64) (*RepetitionStats, error) {
 	return stats, nil
 }
 
-func (r *Repetition) Save(chatID int64, word, definition string) error {
+func (r *Repetition) Save(chatID int64, word, definition, entities string) error {
 	// FIXME: Don't insert duplicates!
 	t := time.Now().Unix()
 	_, err := r.db.Exec(`
 		INSERT INTO Repetition(chat_id,
-			word, definition, stage,
+			word, definition, definition_entities, stage,
 			ease, ivl,
 			last_updated_seconds, next_review_seconds)
-		VALUES($0, $1, $2, $3, $4, $5, $6, $7)`,
-		chatID, word, definition, 0,
+		VALUES($0, $1, $2, $3, $4, $5, $6, $7, $8)`,
+		chatID, word, definition, entities, 0,
 		r.initialEase, r.initialIvl,
 		t, t+r.initialIvl*int64(time.Hour.Seconds()))
 	return err
@@ -302,18 +313,23 @@ func (r *Repetition) Answer(chatID int64, word string, answ AnswerEase) error {
 	return nil
 }
 
-func (r *Repetition) GetDefinition(chatID int64, word string) (string, error) {
+// FIXME: Too many return valuables. Create a struct to hold it. The same for Save.
+func (r *Repetition) GetDefinition(chatID int64, word string) (def string, entities string, err error) {
 	row := r.db.QueryRow(`
-		SELECT definition
+		SELECT definition, definition_entities
 		FROM Repetition
 		WHERE word = $0
 		  AND chat_id = $1`,
 		word, chatID)
-	var d string
-	if err := row.Scan(&d); err != nil {
-		return "", fmt.Errorf("INTERNAL: Did not find definition: %w", err)
+	var e sql.NullString
+	if err = row.Scan(&def, &e); err != nil {
+		err = fmt.Errorf("INTERNAL: Did not find definition: %w", err)
+		return
 	}
-	return d, nil
+	if e.Valid {
+		entities = e.String
+	}
+	return
 }
 
 func (r *Repetition) Exists(chatID int64, word string) (bool, error) {
