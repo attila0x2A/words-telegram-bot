@@ -332,7 +332,7 @@ func ReplyCommand(reply func(s *State, chatID int64) error) CommandFactory {
 }
 
 func NewMessageReply(chatID int64, text, entities string, ik ...*InlineKeyboard) *MessageReply {
-	var rm *InlineKeyboardMarkup
+	var rm interface{}
 	if len(ik) > 0 {
 		rm = &InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{ik},
