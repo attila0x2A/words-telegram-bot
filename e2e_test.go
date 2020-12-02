@@ -35,7 +35,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// TODO: have a fake wiki server.
+// TODO: have a fake servers. Tests will work faster, even though less e2e.
 func TestTelegramBotE2E(t *testing.T) {
 	// TODO: mock wiki
 	// TODO: test edit message
@@ -216,6 +216,7 @@ card 2
 		default:
 			t.Fatalf("Unsupported type for ReplyMarkup %v. Please extent e2e_test.", rm)
 		}
+		// TODO: Tests should take into account if several messages were returned.
 		got = append(got, Test{
 			Send:        msg,
 			Want:        lm.Text,
