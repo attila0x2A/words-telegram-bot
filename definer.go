@@ -30,7 +30,7 @@ import (
 // is around 4096. Having stricter limit makes it simpler to add things like
 // link to the source, or img without worrying about limits.
 // Limit was chosen arbitrary. It is difficult to read long texts.
-const MaxMessageLength = 700
+const MaxMessageLength = 1200
 
 type Definer struct {
 	usage *UsageFetcher
