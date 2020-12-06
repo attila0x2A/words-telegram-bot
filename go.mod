@@ -1,4 +1,4 @@
-module words
+module words.local
 
 go 1.13
 
